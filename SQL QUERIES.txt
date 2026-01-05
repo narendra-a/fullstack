@@ -1,0 +1,280 @@
+MariaDB [(none)]> USE fullstack
+Database changed
+MariaDB [fullstack]> CREATE TABLE Student (
+    ->     VTU_Number VARCHAR(20) PRIMARY KEY,
+    ->     Name VARCHAR(100),
+    ->     Email VARCHAR(100),
+    ->     Phone VARCHAR(15),
+    ->     Department VARCHAR(50)
+    -> );
+Query OK, 0 rows affected (0.046 sec)
+
+MariaDB [fullstack]> CREATE TABLE Course (
+    ->     Course_Code VARCHAR(10) PRIMARY KEY,
+    ->     Course_Name VARCHAR(100),
+    ->     Faculty_Id INT,
+    ->     Student_ID VARCHAR(20),
+    ->     Faculty_Email VARCHAR(100),
+    ->     FOREIGN KEY (Student_ID) REFERENCES Student(VTU_Number)
+    -> );
+Query OK, 0 rows affected (0.051 sec)
+
+MariaDB [fullstack]> INSERT INTO Student VALUES
+    -> ('1MS23CS001', 'Arjun Kumar', 'arjun@mail.com', '9845011223', 'CSE'),
+    -> ('1MS23CS002', 'Sneha Rao', 'sneha@mail.com', '9845022334', 'IT'),
+    -> ('1MS23CS003', 'Rahul Nair', 'rahul@mail.com', '9845033445', 'CSE'),
+    -> ('1MS23CS004', 'Priya Das', 'priya@mail.com', '9845044556', 'ECE'),
+    -> ('1MS23CS005', 'Amit Singh', 'amit@mail.com', '9845055667', 'IT');
+Query OK, 5 rows affected (0.031 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+MariaDB [fullstack]> INSERT INTO Course VALUES
+    -> ('CS101', 'Database Management', 101, '1MS23CS001', 'prof_smith@vtu.edu'),
+    -> ('IS202', 'Data Structures', 102, '1MS23CS002', 'prof_jones@vtu.edu'),
+    -> ('CS103', 'Operating Systems', 101, '1MS23CS003', 'prof_smith@vtu.edu'),
+    -> ('EC301', 'Digital Electronics', 103, '1MS23CS004', 'prof_kumar@vtu.edu'),
+    -> ('IS204', 'Web Programming', 104, '1MS23CS005', 'prof_leila@vtu.edu');
+Query OK, 5 rows affected (0.026 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+MariaDB [fullstack]> SELECT * FROM Student WHERE Department = 'CSE';
++------------+-------------+----------------+------------+------------+
+| VTU_Number | Name        | Email          | Phone      | Department |
++------------+-------------+----------------+------------+------------+
+| 1MS23CS001 | Arjun Kumar | arjun@mail.com | 9845011223 | CSE        |
+| 1MS23CS003 | Rahul Nair  | rahul@mail.com | 9845033445 | CSE        |
++------------+-------------+----------------+------------+------------+
+2 rows in set (0.001 sec)
+
+MariaDB [fullstack]> SELECT * FROM Course ORDER BY Course_Name ASC;
++-------------+---------------------+------------+------------+--------------------+
+| Course_Code | Course_Name         | Faculty_Id | Student_ID | Faculty_Email      |
++-------------+---------------------+------------+------------+--------------------+
+| IS202       | Data Structures     |        102 | 1MS23CS002 | prof_jones@vtu.edu |
+| CS101       | Database Management |        101 | 1MS23CS001 | prof_smith@vtu.edu |
+| EC301       | Digital Electronics |        103 | 1MS23CS004 | prof_kumar@vtu.edu |
+| CS103       | Operating Systems   |        101 | 1MS23CS003 | prof_smith@vtu.edu |
+| IS204       | Web Programming     |        104 | 1MS23CS005 | prof_leila@vtu.edu |
++-------------+---------------------+------------+------------+--------------------+
+5 rows in set (0.001 sec)
+
+MariaDB [fullstack]> SELECT Name, Email FROM Student WHERE Email LIKE '%@mail.com';
++-------------+----------------+
+| Name        | Email          |
++-------------+----------------+
+| Arjun Kumar | arjun@mail.com |
+| Sneha Rao   | sneha@mail.com |
+| Rahul Nair  | rahul@mail.com |
+| Priya Das   | priya@mail.com |
+| Amit Singh  | amit@mail.com  |
++-------------+----------------+
+5 rows in set (0.001 sec)
+
+MariaDB [fullstack]> SELECT * FROM Student LIMIT 3;
++------------+-------------+----------------+------------+------------+
+| VTU_Number | Name        | Email          | Phone      | Department |
++------------+-------------+----------------+------------+------------+
+| 1MS23CS001 | Arjun Kumar | arjun@mail.com | 9845011223 | CSE        |
+| 1MS23CS002 | Sneha Rao   | sneha@mail.com | 9845022334 | IT         |
+| 1MS23CS003 | Rahul Nair  | rahul@mail.com | 9845033445 | CSE        |
++------------+-------------+----------------+------------+------------+
+3 rows in set (0.001 sec)
+
+MariaDB [fullstack]> SELECT Department, COUNT(*) as Total_Students
+    -> FROM Student
+    -> GROUP BY Department
+    -> HAVING COUNT(*) > 1;
++------------+----------------+
+| Department | Total_Students |
++------------+----------------+
+| CSE        |              2 |
+| IT         |              2 |
++------------+----------------+
+2 rows in set (0.001 sec)
+
+MariaDB [fullstack]> SELECT * FROM Student;
++------------+-------------+----------------+------------+------------+
+| VTU_Number | Name        | Email          | Phone      | Department |
++------------+-------------+----------------+------------+------------+
+| 1MS23CS001 | Arjun Kumar | arjun@mail.com | 9845011223 | CSE        |
+| 1MS23CS002 | Sneha Rao   | sneha@mail.com | 9845022334 | IT         |
+| 1MS23CS003 | Rahul Nair  | rahul@mail.com | 9845033445 | CSE        |
+| 1MS23CS004 | Priya Das   | priya@mail.com | 9845044556 | ECE        |
+| 1MS23CS005 | Amit Singh  | amit@mail.com  | 9845055667 | IT         |
++------------+-------------+----------------+------------+------------+
+5 rows in set (0.001 sec)
+
+MariaDB [fullstack]> SELECT * FROM Course;
++-------------+---------------------+------------+------------+--------------------+
+| Course_Code | Course_Name         | Faculty_Id | Student_ID | Faculty_Email      |
++-------------+---------------------+------------+------------+--------------------+
+| CS101       | Database Management |        101 | 1MS23CS001 | prof_smith@vtu.edu |
+| CS103       | Operating Systems   |        101 | 1MS23CS003 | prof_smith@vtu.edu |
+| EC301       | Digital Electronics |        103 | 1MS23CS004 | prof_kumar@vtu.edu |
+| IS202       | Data Structures     |        102 | 1MS23CS002 | prof_jones@vtu.edu |
+| IS204       | Web Programming     |        104 | 1MS23CS005 | prof_leila@vtu.edu |
++-------------+---------------------+------------+------------+--------------------+
+5 rows in set (0.001 sec)
+
+MariaDB [fullstack]> SELECT COUNT(*) AS Total_Students FROM Student;
++----------------+
+| Total_Students |
++----------------+
+|              5 |
++----------------+
+1 row in set (0.001 sec)
+
+MariaDB [fullstack]> SELECT COUNT(DISTINCT Department) AS Department_Count FROM Student;
++------------------+
+| Department_Count |
++------------------+
+|                3 |
++------------------+
+1 row in set (0.000 sec)
+
+MariaDB [fullstack]> SELECT MAX(Faculty_Id) AS Highest_Faculty_ID FROM Course;
++--------------------+
+| Highest_Faculty_ID |
++--------------------+
+|                104 |
++--------------------+
+1 row in set (0.001 sec)
+
+MariaDB [fullstack]> SELECT * FROM Student
+    -> ORDER BY VTU_Number ASC;
++------------+-------------+----------------+------------+------------+
+| VTU_Number | Name        | Email          | Phone      | Department |
++------------+-------------+----------------+------------+------------+
+| 1MS23CS001 | Arjun Kumar | arjun@mail.com | 9845011223 | CSE        |
+| 1MS23CS002 | Sneha Rao   | sneha@mail.com | 9845022334 | IT         |
+| 1MS23CS003 | Rahul Nair  | rahul@mail.com | 9845033445 | CSE        |
+| 1MS23CS004 | Priya Das   | priya@mail.com | 9845044556 | ECE        |
+| 1MS23CS005 | Amit Singh  | amit@mail.com  | 9845055667 | IT         |
++------------+-------------+----------------+------------+------------+
+5 rows in set (0.000 sec)
+
+MariaDB [fullstack]> SELECT * FROM Student
+    -> ORDER BY VTU_Number DESC;
++------------+-------------+----------------+------------+------------+
+| VTU_Number | Name        | Email          | Phone      | Department |
++------------+-------------+----------------+------------+------------+
+| 1MS23CS005 | Amit Singh  | amit@mail.com  | 9845055667 | IT         |
+| 1MS23CS004 | Priya Das   | priya@mail.com | 9845044556 | ECE        |
+| 1MS23CS003 | Rahul Nair  | rahul@mail.com | 9845033445 | CSE        |
+| 1MS23CS002 | Sneha Rao   | sneha@mail.com | 9845022334 | IT         |
+| 1MS23CS001 | Arjun Kumar | arjun@mail.com | 9845011223 | CSE        |
++------------+-------------+----------------+------------+------------+
+5 rows in set (0.001 sec)
+
+MariaDB [fullstack]> SELECT * FROM Student
+    -> WHERE Department = 'CSE';
++------------+-------------+----------------+------------+------------+
+| VTU_Number | Name        | Email          | Phone      | Department |
++------------+-------------+----------------+------------+------------+
+| 1MS23CS001 | Arjun Kumar | arjun@mail.com | 9845011223 | CSE        |
+| 1MS23CS003 | Rahul Nair  | rahul@mail.com | 9845033445 | CSE        |
++------------+-------------+----------------+------------+------------+
+2 rows in set (0.001 sec)
+
+MariaDB [fullstack]> SELECT
+    ->     s.VTU_Number,
+    ->     s.Name AS Student_Name,
+    ->     c.Course_Name,
+    ->     c.Faculty_Id,
+    ->     c.Faculty_Email
+    -> FROM Student s
+    -> INNER JOIN Course c ON s.VTU_Number = c.Student_ID;
++------------+--------------+---------------------+------------+--------------------+
+| VTU_Number | Student_Name | Course_Name         | Faculty_Id | Faculty_Email      |
++------------+--------------+---------------------+------------+--------------------+
+| 1MS23CS001 | Arjun Kumar  | Database Management |        101 | prof_smith@vtu.edu |
+| 1MS23CS003 | Rahul Nair   | Operating Systems   |        101 | prof_smith@vtu.edu |
+| 1MS23CS004 | Priya Das    | Digital Electronics |        103 | prof_kumar@vtu.edu |
+| 1MS23CS002 | Sneha Rao    | Data Structures     |        102 | prof_jones@vtu.edu |
+| 1MS23CS005 | Amit Singh   | Web Programming     |        104 | prof_leila@vtu.edu |
++------------+--------------+---------------------+------------+--------------------+
+5 rows in set (0.001 sec)
+
+MariaDB [fullstack]> SELECT
+    ->     s.VTU_Number,
+    ->     s.Name,
+    ->     c.Course_Name
+    -> FROM Student s
+    -> LEFT JOIN Course c ON s.VTU_Number = c.Student_ID;
++------------+-------------+---------------------+
+| VTU_Number | Name        | Course_Name         |
++------------+-------------+---------------------+
+| 1MS23CS001 | Arjun Kumar | Database Management |
+| 1MS23CS003 | Rahul Nair  | Operating Systems   |
+| 1MS23CS004 | Priya Das   | Digital Electronics |
+| 1MS23CS002 | Sneha Rao   | Data Structures     |
+| 1MS23CS005 | Amit Singh  | Web Programming     |
++------------+-------------+---------------------+
+5 rows in set (0.001 sec)
+
+MariaDB [fullstack]> SELECT
+    ->     s.Name,
+    ->     c.Course_Code,
+    ->     c.Course_Name
+    -> FROM Student s
+    -> RIGHT JOIN Course c ON s.VTU_Number = c.Student_ID;
++-------------+-------------+---------------------+
+| Name        | Course_Code | Course_Name         |
++-------------+-------------+---------------------+
+| Arjun Kumar | CS101       | Database Management |
+| Rahul Nair  | CS103       | Operating Systems   |
+| Priya Das   | EC301       | Digital Electronics |
+| Sneha Rao   | IS202       | Data Structures     |
+| Amit Singh  | IS204       | Web Programming     |
++-------------+-------------+---------------------+
+5 rows in set (0.001 sec)
+
+MariaDB [fullstack]> SELECT s.Name, c.Course_Name FROM Student s
+    -> LEFT JOIN Course c ON s.VTU_Number = c.Student_ID
+    -> UNION
+    -> SELECT s.Name, c.Course_Name FROM Student s
+    -> RIGHT JOIN Course c ON s.VTU_Number = c.Student_ID;
++-------------+---------------------+
+| Name        | Course_Name         |
++-------------+---------------------+
+| Arjun Kumar | Database Management |
+| Rahul Nair  | Operating Systems   |
+| Priya Das   | Digital Electronics |
+| Sneha Rao   | Data Structures     |
+| Amit Singh  | Web Programming     |
++-------------+---------------------+
+5 rows in set (0.001 sec)
+
+MariaDB [fullstack]> SELECT s.Name, c.Course_Name
+    -> FROM Student s
+    -> CROSS JOIN Course c;
++-------------+---------------------+
+| Name        | Course_Name         |
++-------------+---------------------+
+| Arjun Kumar | Database Management |
+| Sneha Rao   | Database Management |
+| Rahul Nair  | Database Management |
+| Priya Das   | Database Management |
+| Amit Singh  | Database Management |
+| Arjun Kumar | Operating Systems   |
+| Sneha Rao   | Operating Systems   |
+| Rahul Nair  | Operating Systems   |
+| Priya Das   | Operating Systems   |
+| Amit Singh  | Operating Systems   |
+| Arjun Kumar | Digital Electronics |
+| Sneha Rao   | Digital Electronics |
+| Rahul Nair  | Digital Electronics |
+| Priya Das   | Digital Electronics |
+| Amit Singh  | Digital Electronics |
+| Arjun Kumar | Data Structures     |
+| Sneha Rao   | Data Structures     |
+| Rahul Nair  | Data Structures     |
+| Priya Das   | Data Structures     |
+| Amit Singh  | Data Structures     |
+| Arjun Kumar | Web Programming     |
+| Sneha Rao   | Web Programming     |
+| Rahul Nair  | Web Programming     |
+| Priya Das   | Web Programming     |
+| Amit Singh  | Web Programming     |
++-------------+---------------------+
+25 rows in set (0.003 sec)
