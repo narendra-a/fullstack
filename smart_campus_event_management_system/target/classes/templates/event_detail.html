@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Event Details')}"></head>
+<body>
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<main>
+    <div style="max-width:720px; margin:0 auto;" class="animate-in">
+
+        <!-- Back link -->
+        <div style="margin-bottom:24px;">
+            <a href="/" class="action-link">&larr; Back to Events</a>
+        </div>
+
+        <!-- Event card -->
+        <div class="form-wrap form-wrap-wide" style="max-width:100%;">
+
+            <!-- Badge + Type -->
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+                <span class="badge"
+                      th:classappend="${event.type == 'Workshop'} ? 'badge-workshop'
+                                    : (${event.type == 'Seminar'} ? 'badge-seminar'
+                                    : (${event.type == 'Cultural'} ? 'badge-cultural'
+                                    : (${event.type == 'Sports'} ? 'badge-sports'
+                                    : (${event.type == 'Hackathon'} ? 'badge-hackathon'
+                                    : (${event.type == 'Symposium'} ? 'badge-symposium'
+                                    : (${event.type == 'Exhibition'} ? 'badge-exhibition' : 'badge-default'))))))"
+                      th:text="${event.type}">Workshop</span>
+                <span th:if="${isRegistered}" class="reg-status confirmed">You're Registered</span>
+            </div>
+
+            <!-- Title -->
+            <h1 style="font-size:1.5rem; font-weight:700; margin-bottom:8px; letter-spacing:-0.3px;"
+                th:text="${event.name}">Event Name</h1>
+
+            <!-- Description -->
+            <p style="color:var(--text-secondary); font-size:0.9375rem; line-height:1.7; margin-bottom:24px;"
+               th:text="${event.description}">Description</p>
+
+            <hr class="divider">
+
+            <!-- Details grid -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px 32px; margin-bottom:24px;">
+                <div>
+                    <div style="font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:4px;">Date</div>
+                    <div style="font-weight:600;" th:text="${#temporals.format(event.eventDate, 'MMMM d, yyyy')}">May 15, 2026</div>
+                </div>
+                <div>
+                    <div style="font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:4px;">Department</div>
+                    <div style="font-weight:600;" th:text="${event.department}">Computer Science</div>
+                </div>
+                <div th:if="${event.location}">
+                    <div style="font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:4px;">Location</div>
+                    <div style="font-weight:600;" th:text="${event.location}">CS Lab 301</div>
+                </div>
+                <div th:if="${event.capacity}">
+                    <div style="font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:4px;">Capacity</div>
+                    <div style="font-weight:600;">
+                        <span th:text="${registrationCount}">5</span>
+                        /
+                        <span th:text="${event.capacity}">40</span>
+                        <span style="color:var(--text-muted); font-weight:400;">registered</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Capacity bar -->
+            <div th:if="${event.capacity}" style="margin-bottom:24px;">
+                <div class="progress-bar-wrap">
+                    <div class="progress-bar-fill"
+                         th:style="'width:' + ${(registrationCount * 100) / event.capacity} + '%'"></div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div style="display:flex; gap:12px;">
+                <a th:if="${!isRegistered}"
+                   th:href="@{'/events/register/' + ${event.id}}"
+                   class="btn btn-primary btn-lg" style="flex:2; text-align:center;"
+                   th:text="${session.studentName != null ? 'Quick Register' : 'Register Now'}">Register</a>
+                <span th:if="${isRegistered}" class="btn btn-outline btn-lg" style="flex:2; text-align:center; pointer-events:none; opacity:0.6;">
+                    Already Registered
+                </span>
+                <a href="/" class="btn btn-outline btn-lg" style="flex:1; text-align:center;">Back</a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{layout :: footer}"></footer>
+<th:block th:replace="~{layout :: scripts}"></th:block>
+</body>
+</html>

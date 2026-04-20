@@ -1,0 +1,14 @@
+C:\smart_campus_event_management_system\src\main\java\com\smartcampus\config\SecurityConfig.java
+C:\smart_campus_event_management_system\src\main\java\com\smartcampus\controller\AdminController.java
+C:\smart_campus_event_management_system\src\main\java\com\smartcampus\controller\AuthController.java
+C:\smart_campus_event_management_system\src\main\java\com\smartcampus\controller\StudentController.java
+C:\smart_campus_event_management_system\src\main\java\com\smartcampus\entity\Event.java
+C:\smart_campus_event_management_system\src\main\java\com\smartcampus\entity\Registration.java
+C:\smart_campus_event_management_system\src\main\java\com\smartcampus\entity\Student.java
+C:\smart_campus_event_management_system\src\main\java\com\smartcampus\exception\GlobalExceptionHandler.java
+C:\smart_campus_event_management_system\src\main\java\com\smartcampus\repository\EventRepository.java
+C:\smart_campus_event_management_system\src\main\java\com\smartcampus\repository\RegistrationRepository.java
+C:\smart_campus_event_management_system\src\main\java\com\smartcampus\repository\StudentRepository.java
+C:\smart_campus_event_management_system\src\main\java\com\smartcampus\service\EventService.java
+C:\smart_campus_event_management_system\src\main\java\com\smartcampus\service\RegistrationService.java
+C:\smart_campus_event_management_system\src\main\java\com\smartcampus\SmartCampusApplication.java

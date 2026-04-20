@@ -1,0 +1,14 @@
+com\smartcampus\controller\StudentController.class
+com\smartcampus\entity\Event.class
+com\smartcampus\config\SecurityConfig.class
+com\smartcampus\repository\EventRepository.class
+com\smartcampus\service\RegistrationService.class
+com\smartcampus\exception\GlobalExceptionHandler.class
+com\smartcampus\repository\StudentRepository.class
+com\smartcampus\controller\AdminController.class
+com\smartcampus\controller\AuthController.class
+com\smartcampus\repository\RegistrationRepository.class
+com\smartcampus\service\EventService.class
+com\smartcampus\SmartCampusApplication.class
+com\smartcampus\entity\Student.class
+com\smartcampus\entity\Registration.class

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{layout :: head('Admin Sign In')}"></head>
+
+<body>
+    <div class="login-page">
+        <div class="login-box animate-in">
+            <!-- Logo -->
+            <div class="login-logo">
+                <div class="login-logo-brand">SmartCampus</div>
+                <div class="login-logo-title">Admin Sign In</div>
+                <p class="login-logo-sub">Access the administration portal</p>
+            </div>
+
+            <!-- Alerts -->
+            <div th:if="${param.error}" class="alert alert-danger">
+                Invalid username or password. Try again.
+            </div>
+            <div th:if="${param.logout}" class="alert alert-success">
+                You have been logged out successfully.
+            </div>
+
+            <!-- Form -->
+            <form th:action="@{/login}" method="post">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required autofocus placeholder="Enter username"
+                        autocomplete="username" />
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required placeholder="Enter password"
+                        autocomplete="current-password" />
+                </div>
+                <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top:4px;">
+                    Sign In
+                </button>
+            </form>
+
+            <hr class="divider">
+            <!-- <p style="text-align:center; color:var(--text-muted); font-size:0.8125rem;">
+                Default credentials: <strong style="color:var(--text-secondary);">admin / admin123</strong>
+                </p> -->
+            <div style="text-align:center; margin-top:16px;">
+                <a href="/" class="action-link" style="font-size:0.8125rem;">
+                    &larr; Back to Events
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer credits -->
+    <div style="position:fixed; bottom:16px; width:100%; text-align:center; z-index:10;">
+        <span style="font-size:0.75rem; color:var(--text-muted);">
+            Narendra A &nbsp;|&nbsp; VTU: vtu25917
+        </span>
+    </div>
+
+    <th:block th:replace="~{layout :: scripts}"></th:block>
+</body>
+
+</html>

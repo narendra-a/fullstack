@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Error')}"></head>
+<body>
+<nav th:replace="~{layout :: navbar}"></nav>
+<main>
+    <div class="error-page animate-in">
+        <div class="error-code" th:text="${status}">404</div>
+        <h2 th:text="${error ?: 'Something went wrong'}">Page Not Found</h2>
+        <p th:text="${message ?: 'The page you\'re looking for doesn\'t exist or has been moved.'}">
+            Error description.
+        </p>
+        <div class="error-actions">
+            <a href="/" class="btn btn-primary">Go Home</a>
+            <a href="javascript:history.back()" class="btn btn-outline">Go Back</a>
+        </div>
+    </div>
+</main>
+<footer th:replace="~{layout :: footer}"></footer>
+<th:block th:replace="~{layout :: scripts}"></th:block>
+</body>
+</html>

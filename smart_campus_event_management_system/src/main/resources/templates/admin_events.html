@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Event Management')}"></head>
+<body>
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<main>
+    <!-- Page Header -->
+    <div class="page-header page-header-row animate-in">
+        <div>
+            <h1>Event Management</h1>
+            <p>Create, edit, and manage all campus events</p>
+        </div>
+        <div class="page-header-actions">
+            <a href="/admin/stats" class="btn btn-outline">Statistics</a>
+            <a href="/admin/events/new" class="btn btn-primary">Create New Event</a>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar animate-in">
+        <form action="/admin/events" method="get" style="display:contents;">
+            <div class="form-group">
+                <label>Department</label>
+                <input type="text" name="department" th:value="${param.department}" placeholder="Filter by department"/>
+            </div>
+            <div class="form-group">
+                <label>Event Type</label>
+                <select name="type">
+                    <option value="">All Types</option>
+                    <option value="Workshop"   th:selected="${#strings.equals(param.type, 'Workshop')}  ">Workshop</option>
+                    <option value="Seminar"    th:selected="${#strings.equals(param.type, 'Seminar')}   ">Seminar</option>
+                    <option value="Cultural"   th:selected="${#strings.equals(param.type, 'Cultural')}  ">Cultural</option>
+                    <option value="Sports"     th:selected="${#strings.equals(param.type, 'Sports')}    ">Sports</option>
+                    <option value="Hackathon"  th:selected="${#strings.equals(param.type, 'Hackathon')} ">Hackathon</option>
+                    <option value="Symposium"  th:selected="${#strings.equals(param.type, 'Symposium')} ">Symposium</option>
+                    <option value="Exhibition" th:selected="${#strings.equals(param.type, 'Exhibition')}">Exhibition</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>From Date</label>
+                <input type="date" name="date" th:value="${param.date}"/>
+            </div>
+            <div style="display:flex; gap:8px; align-items:flex-end;">
+                <button type="submit" class="btn btn-primary">Filter</button>
+                <a href="/admin/events" class="btn btn-ghost">Clear</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Events Table -->
+    <div class="table-wrap animate-in">
+        <div class="table-header">
+            <span class="table-title">All Events</span>
+            <span class="chip" th:text="'Showing: ' + ${#lists.size(events)}">Showing: 0</span>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Event Name</th>
+                    <th>Date</th>
+                    <th>Department</th>
+                    <th>Type</th>
+                    <th>Registrations</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="event : ${events}">
+                    <td style="color:var(--text-muted);" th:text="${event.id}">1</td>
+                    <td style="font-weight:600;" th:text="${event.name}">Name</td>
+                    <td th:text="${#temporals.format(event.eventDate, 'MMM d, yyyy')}">May 15, 2026</td>
+                    <td th:text="${event.department}">Dept</td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${event.type == 'Workshop'} ? 'badge-workshop'
+                                            : (${event.type == 'Seminar'} ? 'badge-seminar'
+                                            : (${event.type == 'Cultural'} ? 'badge-cultural'
+                                            : (${event.type == 'Sports'} ? 'badge-sports'
+                                            : (${event.type == 'Hackathon'} ? 'badge-hackathon'
+                                            : (${event.type == 'Symposium'} ? 'badge-symposium'
+                                            : (${event.type == 'Exhibition'} ? 'badge-exhibition' : 'badge-default'))))))"
+                              th:text="${event.type}">Type</span>
+                    </td>
+                    <td>
+                        <span th:text="${regCounts.containsKey(event.id) ? regCounts[event.id] : 0}">0</span>
+                        <span th:if="${event.capacity}" style="color:var(--text-muted);">
+                            / <span th:text="${event.capacity}">40</span>
+                        </span>
+                    </td>
+                    <td>
+                        <div style="display:flex; gap:6px;">
+                            <a th:href="@{'/admin/events/edit/' + ${event.id}}"
+                               class="btn btn-outline btn-sm">Edit</a>
+                            <a th:href="@{'/admin/events/delete/' + ${event.id}}"
+                               class="btn btn-ghost btn-sm" style="color:var(--danger);"
+                               onclick="return confirm('Delete this event? This cannot be undone.')">Delete</a>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(events)}">
+                    <td colspan="7">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">&#128203;</div>
+                            <h3>No events found</h3>
+                            <p>No events match your filter criteria.</p>
+                            <a href="/admin/events/new" class="btn btn-primary">Create First Event</a>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<footer th:replace="~{layout :: footer}"></footer>
+<th:block th:replace="~{layout :: scripts}"></th:block>
+</body>
+</html>

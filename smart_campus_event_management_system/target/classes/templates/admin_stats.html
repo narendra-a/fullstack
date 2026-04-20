@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Registration Statistics')}"></head>
+<body>
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<main>
+    <div class="page-header page-header-row animate-in">
+        <div>
+            <h1>Registration Statistics</h1>
+            <p>Aggregated analytics across all campus events</p>
+        </div>
+        <a href="/admin/events" class="btn btn-outline">&larr; Back to Events</a>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="stats-grid animate-in">
+        <div class="stat-card">
+            <div class="stat-label">Events With Registrations</div>
+            <div class="stat-num" th:text="${stats.size()}">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Total Registrations</div>
+            <div class="stat-num" th:text="${totalRegistrations}">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Avg Per Event</div>
+            <div class="stat-num"
+                 th:if="${!#lists.isEmpty(stats)}"
+                 th:text="${#numbers.formatDecimal(totalRegistrations * 1.0 / stats.size(), 1, 1)}">0</div>
+            <div class="stat-num" th:if="${#lists.isEmpty(stats)}">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Most Popular</div>
+            <div class="stat-num stat-num-sm"
+                 th:if="${!#lists.isEmpty(stats)}"
+                 th:text="${stats[0][0]}">—</div>
+            <div class="stat-num" th:if="${#lists.isEmpty(stats)}">—</div>
+        </div>
+    </div>
+
+    <!-- Per Event Table -->
+    <div class="table-wrap animate-in">
+        <div class="table-header">
+            <span class="table-title">Registrations Per Event</span>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Event Name</th>
+                    <th>Total Registrations</th>
+                    <th>Popularity</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="stat, i : ${stats}">
+                    <td style="color:var(--text-muted);" th:text="${i.index + 1}">1</td>
+                    <td style="font-weight:600;" th:text="${stat[0]}">Event Name</td>
+                    <td>
+                        <span class="badge badge-default" th:text="${stat[1]}">0</span>
+                    </td>
+                    <td style="min-width:180px;">
+                        <div class="progress-bar-wrap">
+                            <div class="progress-bar-fill"
+                                 th:if="${!#lists.isEmpty(stats) and stats[0][1] > 0}"
+                                 th:style="'width:' + ${(stat[1] * 100) / stats[0][1]} + '%'">
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(stats)}">
+                    <td colspan="4">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">&#128202;</div>
+                            <h3>No registrations yet</h3>
+                            <p>Statistics will appear once students start registering.</p>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<footer th:replace="~{layout :: footer}"></footer>
+<th:block th:replace="~{layout :: scripts}"></th:block>
+</body>
+</html>

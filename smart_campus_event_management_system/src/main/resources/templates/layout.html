@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Smart Campus Event Management System — Discover, register and manage campus events">
+    <title th:text="${title} + ' | SmartCampus'">SmartCampus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <script>
+        (function() {
+            var t = localStorage.getItem('scTheme') || 'light';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+</head>
+<body>
+
+<!-- ═══ NAVBAR ═══ -->
+<nav th:fragment="navbar">
+    <a href="/" class="brand">SmartCampus</a>
+
+    <div class="nav-links">
+        <a href="/">Events</a>
+        <a href="/student/my-events">My Events</a>
+
+        <!-- Admin-only links -->
+        <span sec:authorize="hasRole('ADMIN')">
+            <span class="nav-divider"></span>
+            <a href="/admin/events">Manage Events</a>
+            <a href="/admin/stats">Statistics</a>
+        </span>
+
+        <!-- Admin logout -->
+        <span sec:authorize="isAuthenticated()">
+            <span class="nav-divider"></span>
+            <form th:action="@{/logout}" method="post" style="display:inline;">
+                <button type="submit" class="btn btn-ghost btn-sm">Logout</button>
+            </form>
+        </span>
+
+        <!-- Student session -->
+        <span th:if="${session.studentName != null}" class="nav-user">
+            <span class="nav-divider"></span>
+            <a href="/student/dashboard" class="nav-user-badge"
+               th:text="${session.studentName}">Student</a>
+            <a href="/student/logout" class="btn btn-ghost btn-sm">Sign Out</a>
+        </span>
+
+        <!-- Sign-in buttons (no session) -->
+        <span th:if="${session.studentName == null}" sec:authorize="isAnonymous()" class="nav-user">
+            <span class="nav-divider"></span>
+            <a href="/student/login" class="btn btn-outline btn-sm">Student Sign In</a>
+            <a href="/login" class="btn btn-primary btn-sm">Admin</a>
+        </span>
+
+        <!-- Theme Toggle -->
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme" onclick="toggleTheme()">
+            <span class="theme-toggle-icon moon">&#9790;</span>
+            <span class="theme-toggle-icon sun">&#9788;</span>
+        </button>
+    </div>
+</nav>
+
+<!-- ═══ FOOTER ═══ -->
+<footer th:fragment="footer">
+    <div class="footer-inner">
+        <div class="footer-brand">SmartCampus</div>
+        <div class="footer-credits">
+            Developed by <strong>Narendra A</strong> &nbsp;|&nbsp;
+            VTU: <strong>vtu25917</strong>
+        </div>
+        <div class="footer-credits">
+            Smart Campus Event Management System &copy; 2026
+        </div>
+    </div>
+</footer>
+
+<script th:fragment="scripts">
+    function toggleTheme() {
+        var root = document.documentElement;
+        var current = root.getAttribute('data-theme') || 'light';
+        var next = current === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', next);
+        localStorage.setItem('scTheme', next);
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        var t = localStorage.getItem('scTheme') || 'light';
+        document.documentElement.setAttribute('data-theme', t);
+    });
+</script>
+</body>
+</html>

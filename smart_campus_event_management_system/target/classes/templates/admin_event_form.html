@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Manage Event')}"></head>
+<body>
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<main>
+    <div class="form-wrap form-wrap-wide animate-in" style="margin-top:16px;">
+        <!-- Header -->
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px;">
+            <div>
+                <h2 th:text="${event.id == null ? 'Create New Event' : 'Edit Event'}">Create New Event</h2>
+                <p class="form-subtitle" style="margin-bottom:0;"
+                   th:text="${event.id == null
+                       ? 'Fill in the details to publish a new campus event.'
+                       : 'Update the event details below.'}">Fill in the details</p>
+            </div>
+            <a href="/admin/events" class="btn btn-outline btn-sm">&larr; Back</a>
+        </div>
+
+        <form th:action="@{/admin/events}" method="post" th:object="${event}">
+            <input type="hidden" th:field="*{id}" />
+
+            <div class="form-group">
+                <label>Event Name</label>
+                <input type="text" th:field="*{name}" placeholder="e.g. AI & Future Tech Hackathon 2026"/>
+                <span class="error-msg" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
+            </div>
+
+            <div class="form-group">
+                <label>Description</label>
+                <textarea th:field="*{description}" rows="4"
+                          placeholder="Describe the event — what students will learn or experience..."></textarea>
+                <span class="error-msg" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></span>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Event Date</label>
+                    <input type="date" th:field="*{eventDate}"/>
+                    <span class="error-msg" th:if="${#fields.hasErrors('eventDate')}" th:errors="*{eventDate}"></span>
+                </div>
+                <div class="form-group">
+                    <label>Event Type</label>
+                    <select th:field="*{type}">
+                        <option value="Workshop">Workshop</option>
+                        <option value="Seminar">Seminar</option>
+                        <option value="Cultural">Cultural</option>
+                        <option value="Sports">Sports</option>
+                        <option value="Hackathon">Hackathon</option>
+                        <option value="Symposium">Symposium</option>
+                        <option value="Exhibition">Exhibition</option>
+                    </select>
+                    <span class="error-msg" th:if="${#fields.hasErrors('type')}" th:errors="*{type}"></span>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Department</label>
+                    <input type="text" th:field="*{department}" placeholder="e.g. Computer Science"/>
+                    <span class="error-msg" th:if="${#fields.hasErrors('department')}" th:errors="*{department}"></span>
+                </div>
+                <div class="form-group">
+                    <label>Location / Venue</label>
+                    <input type="text" th:field="*{location}" placeholder="e.g. CS Lab 301, Main Auditorium"/>
+                </div>
+            </div>
+
+            <div class="form-group" style="max-width:200px;">
+                <label>Capacity (max attendees)</label>
+                <input type="number" th:field="*{capacity}" placeholder="e.g. 50" min="1"/>
+                <span class="error-msg" th:if="${#fields.hasErrors('capacity')}" th:errors="*{capacity}"></span>
+            </div>
+
+            <hr class="divider">
+
+            <div style="display:flex; gap:12px;">
+                <button type="submit" class="btn btn-primary btn-lg" style="flex:2;">
+                    <span th:text="${event.id == null ? 'Publish Event' : 'Save Changes'}">Publish</span>
+                </button>
+                <a href="/admin/events" class="btn btn-outline btn-lg" style="flex:1; text-align:center;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</main>
+
+<footer th:replace="~{layout :: footer}"></footer>
+<th:block th:replace="~{layout :: scripts}"></th:block>
+</body>
+</html>

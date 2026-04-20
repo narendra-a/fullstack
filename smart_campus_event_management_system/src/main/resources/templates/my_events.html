@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('My Registrations')}"></head>
+<body>
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<main>
+
+    <!-- Search form (when no email yet) -->
+    <div th:if="${displayEmail == null}" class="animate-in" style="max-width:480px; margin:32px auto;">
+        <div style="text-align:center; margin-bottom:24px;">
+            <h1 style="font-size:1.5rem; font-weight:700; margin-bottom:4px;">Find My Events</h1>
+            <p style="color:var(--text-secondary); font-size:0.9375rem;">
+                Enter your registered email to view all your event registrations.
+            </p>
+        </div>
+        <div class="form-wrap">
+            <form action="/student/my-events" method="get">
+                <div class="form-group">
+                    <label for="email">Registered Email Address</label>
+                    <input type="email" id="email" name="email" required
+                           placeholder="yourname@university.edu"/>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block btn-lg">
+                    Lookup Registrations
+                </button>
+            </form>
+            <div style="text-align:center; margin-top:20px;">
+                <a href="/" class="action-link">&larr; Browse Events</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results (when email is provided) -->
+    <div th:if="${displayEmail != null}" class="animate-in">
+        <div class="page-header page-header-row">
+            <div>
+                <h1>My Registrations</h1>
+                <p>
+                    Showing results for
+                    <strong th:text="${displayEmail}" style="color:var(--primary)">email@domain.com</strong>
+                </p>
+            </div>
+            <div class="page-header-actions">
+                <a href="/student/my-events" class="btn btn-outline">Search Another</a>
+                <a href="/" class="btn btn-primary">Browse Events</a>
+            </div>
+        </div>
+
+        <!-- Summary -->
+        <div style="margin-bottom:20px;" th:if="${registrations != null}">
+            <span class="chip">
+                Total Registered:
+                <strong th:text="${#lists.size(registrations)}">0</strong>
+            </span>
+        </div>
+
+        <div class="table-wrap">
+            <div class="table-header">
+                <span class="table-title">Your Event Registrations</span>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Reg. Date</th>
+                        <th>Event Name</th>
+                        <th>Event Date</th>
+                        <th>Location</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="reg : ${registrations}">
+                        <td style="color:var(--text-secondary); font-size:0.8125rem;"
+                            th:text="${#temporals.format(reg.registrationDate, 'MMM d, yyyy HH:mm')}">Date</td>
+                        <td>
+                            <a th:href="@{'/events/' + ${reg.event.id}}" style="font-weight:600; color:var(--primary); text-decoration:none;"
+                               th:text="${reg.event.name}">Name</a>
+                        </td>
+                        <td th:text="${#temporals.format(reg.event.eventDate, 'MMM d, yyyy')}">Ev Date</td>
+                        <td th:text="${reg.event.location ?: reg.event.department}">Location</td>
+                        <td>
+                            <span class="badge"
+                                  th:classappend="${reg.event.type == 'Workshop'} ? 'badge-workshop'
+                                                : (${reg.event.type == 'Seminar'} ? 'badge-seminar'
+                                                : (${reg.event.type == 'Cultural'} ? 'badge-cultural'
+                                                : (${reg.event.type == 'Sports'} ? 'badge-sports'
+                                                : (${reg.event.type == 'Hackathon'} ? 'badge-hackathon' : 'badge-default'))))"
+                                  th:text="${reg.event.type}">Type</span>
+                        </td>
+                        <td><span class="reg-status confirmed">Confirmed</span></td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(registrations)}">
+                        <td colspan="6">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">&#128269;</div>
+                                <h3>No registrations found</h3>
+                                <p>No events registered under this email address.</p>
+                                <a href="/" class="btn btn-primary">Browse &amp; Register</a>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</main>
+
+<footer th:replace="~{layout :: footer}"></footer>
+<th:block th:replace="~{layout :: scripts}"></th:block>
+</body>
+</html>
