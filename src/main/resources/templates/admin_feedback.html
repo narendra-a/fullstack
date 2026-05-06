@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Feedback Dashboard')}"></head>
+<body>
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<main>
+    <!-- Page Header -->
+    <div class="page-header animate-in" style="text-align:center; margin-bottom:32px;">
+        <div style="font-size:2.5rem;">⭐</div>
+        <h1 style="font-size:1.75rem; font-weight:700;">Feedback &amp; Ratings</h1>
+        <p style="color:var(--text-secondary); font-size:0.9375rem;">Event-wise ratings and top-rated experience overview</p>
+    </div>
+
+    <!-- ═══ TWO-COLUMN GRID: Top Rated + All Events ═══ -->
+    <div style="display:grid; grid-template-columns:340px 1fr; gap:24px; align-items:start;" class="animate-in">
+
+        <!-- LEFT: Top Rated Sidebar -->
+        <div class="card" style="padding:1.5rem; position:sticky; top:80px;">
+            <h2 style="font-size:1.1rem; font-weight:700; margin-bottom:1rem;">🏆 Top Rated Events</h2>
+            <div th:if="${#lists.isEmpty(topRated)}" class="text-muted">
+                No feedback collected yet.
+            </div>
+            <div th:if="${!#lists.isEmpty(topRated)}" style="display:flex; flex-direction:column; gap:10px;">
+                <div th:each="item,iter : ${topRated}"
+                     style="display:flex; align-items:center; justify-content:space-between; padding:10px 12px;
+                            background:var(--surface-hover); border-radius:var(--radius-sm); transition:all 0.2s ease;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span style="font-size:1.2rem; font-weight:700; width:28px; text-align:center;"
+                              th:text="${iter.index == 0 ? '🥇' : (iter.index == 1 ? '🥈' : (iter.index == 2 ? '🥉' : iter.count + '.'))}"></span>
+                        <span style="font-weight:600; font-size:0.9rem;" th:text="${item[0]}">Event Name</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:4px;">
+                        <span style="color:#f59e0b; font-size:1rem;">★</span>
+                        <strong style="font-size:0.9rem;" th:text="${#numbers.formatDecimal(item[1], 1, 1)}">4.5</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: All Events Feedback Grid -->
+        <div>
+            <h2 style="font-size:1.1rem; font-weight:700; margin-bottom:16px;">📋 All Events</h2>
+            <div class="grid" style="grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));">
+                <div th:each="event : ${events}" class="event-card">
+                    <!-- Cover image -->
+                    <div class="event-card-cover" style="height:120px;">
+                        <img th:src="@{'/img/event_' + ${event.type != null ? (
+                            event.type == 'Workshop' ? 'workshop' :
+                            event.type == 'Seminar' ? 'seminar' :
+                            event.type == 'Cultural' ? 'cultural' :
+                            event.type == 'Sports' ? 'sports' :
+                            event.type == 'Hackathon' ? 'hackathon' :
+                            event.type == 'Symposium' ? 'symposium' :
+                            event.type == 'Exhibition' ? 'exhibition' : 'default'
+                        ) : 'default'} + '.png'}"
+                             th:alt="${event.type} + ' event illustration'">
+                    </div>
+                    <div class="event-card-body">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
+                            <h3 style="font-size:0.95rem; font-weight:600; margin:0; flex:1;" th:text="${event.name}">Event</h3>
+                            <span class="badge"
+                                  th:classappend="${event.type == 'Workshop'} ? 'badge-workshop'
+                                                : (${event.type == 'Seminar'} ? 'badge-seminar'
+                                                : (${event.type == 'Cultural'} ? 'badge-cultural'
+                                                : (${event.type == 'Sports'} ? 'badge-sports'
+                                                : (${event.type == 'Hackathon'} ? 'badge-hackathon'
+                                                : (${event.type == 'Symposium'} ? 'badge-symposium'
+                                                : (${event.type == 'Exhibition'} ? 'badge-exhibition' : 'badge-default'))))))"
+                                  th:text="${event.type}"
+                                  style="margin-left:8px; flex-shrink:0;">Type</span>
+                        </div>
+
+                        <div th:if="${avgRatings[event.id] != null}" style="margin-bottom:10px;">
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <span style="color:#f59e0b; font-size:1.3rem;">★</span>
+                                <strong th:text="${avgRatings[event.id]}">4.0</strong>
+                                <span class="text-muted" style="font-size:0.85rem;">/ 5.0</span>
+                            </div>
+                        </div>
+                        <div th:if="${avgRatings[event.id] == null}" class="text-muted" style="font-size:0.85rem; margin-bottom:10px;">
+                            No ratings yet
+                        </div>
+
+                        <div class="event-card-meta" style="margin-top:0;">
+                            <span>📅 <span th:text="${#temporals.format(event.eventDate, 'dd MMM yyyy')}">Date</span></span>
+                        </div>
+                    </div>
+                    <div class="event-card-footer">
+                        <a th:href="@{'/admin/feedback/' + ${event.id}}" class="btn btn-outline btn-block">
+                            View Reviews →
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{layout :: footer}"></footer>
+<script th:replace="~{layout :: scripts}"></script>
+</body>
+</html>

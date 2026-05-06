@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('QR Check-In')}"></head>
+<body>
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<div class="container" style="max-width:700px; margin:40px auto;">
+
+    <div style="text-align:center; margin-bottom:2rem;">
+        <div style="font-size:3rem;">📷</div>
+        <h1 style="font-size:2rem; font-weight:700;">QR Code Check-In</h1>
+        <p class="text-muted">Scan student QR codes to mark attendance</p>
+    </div>
+
+    <!-- Flash messages -->
+    <div th:if="${successMessage}" class="alert alert-success" style="margin-bottom:1rem;">
+        ✅ <span th:text="${successMessage}"></span>
+    </div>
+    <div th:if="${warningMessage}" class="alert alert-warning" style="margin-bottom:1rem;">
+        ⚠️ <span th:text="${warningMessage}"></span>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-error" style="margin-bottom:1rem;">
+        ❌ <span th:text="${errorMessage}"></span>
+    </div>
+
+    <!-- Camera Scanner -->
+    <div class="card" style="padding:2rem; margin-bottom:1.5rem;">
+        <h2 style="font-size:1.2rem; font-weight:600; margin-bottom:1rem;">📸 Camera Scanner</h2>
+        <div id="scannerContainer" style="position:relative; width:100%; max-width:480px; margin:0 auto;">
+            <video id="cameraFeed" style="width:100%; border-radius:12px; background:#000;" autoplay playsinline></video>
+            <canvas id="canvas" style="display:none;"></canvas>
+            <div id="scanOverlay" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+                 width:200px; height:200px; border:3px solid #4CAF50; border-radius:8px;
+                 box-shadow:0 0 0 5000px rgba(0,0,0,0.4); pointer-events:none;"></div>
+        </div>
+        <div style="text-align:center; margin-top:1rem; display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
+            <button id="startBtn" class="btn btn-primary" onclick="startCamera()">▶ Start Camera</button>
+            <button id="stopBtn" class="btn btn-outline" onclick="stopCamera()" style="display:none;">⏹ Stop</button>
+        </div>
+        <div id="scanResult" style="margin-top:1rem; padding:1rem; border-radius:8px; display:none;
+             font-weight:600; text-align:center;"></div>
+    </div>
+
+    <!-- Manual Entry -->
+    <div class="card" style="padding:2rem;">
+        <h2 style="font-size:1.2rem; font-weight:600; margin-bottom:1rem;">⌨️ Manual QR Entry</h2>
+        <form action="/admin/checkin" method="post">
+            <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+                <input type="text" name="qrData" id="qrDataInput"
+                       placeholder="e.g. REG:1|USER:1|EVENT:1"
+                       style="flex:1; min-width:200px;"
+                       required>
+                <button type="submit" class="btn btn-primary">✔ Check In</button>
+            </div>
+            <p class="text-muted" style="font-size:0.8rem; margin-top:0.5rem;">
+                Paste the QR code payload or type the registration data manually
+            </p>
+        </form>
+    </div>
+</div>
+
+<footer th:replace="~{layout :: footer}"></footer>
+<script th:replace="~{layout :: scripts}"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<script>
+    let stream = null;
+    let scanning = false;
+    let scanInterval = null;
+
+    async function startCamera() {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+            document.getElementById('cameraFeed').srcObject = stream;
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('stopBtn').style.display = 'inline-block';
+            scanning = true;
+            scanInterval = setInterval(scanFrame, 500);
+        } catch (e) {
+            alert('Camera access denied or not available: ' + e.message);
+        }
+    }
+
+    function stopCamera() {
+        scanning = false;
+        clearInterval(scanInterval);
+        if (stream) stream.getTracks().forEach(t => t.stop());
+        document.getElementById('cameraFeed').srcObject = null;
+        document.getElementById('startBtn').style.display = 'inline-block';
+        document.getElementById('stopBtn').style.display = 'none';
+    }
+
+    function scanFrame() {
+        const video = document.getElementById('cameraFeed');
+        const canvas = document.getElementById('canvas');
+        if (!video.videoWidth) return;
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imageData.data, imageData.width, imageData.height);
+        if (code && code.data) {
+            stopCamera();
+            processQr(code.data);
+        }
+    }
+
+    function processQr(data) {
+        document.getElementById('qrDataInput').value = data;
+        const resultDiv = document.getElementById('scanResult');
+        resultDiv.textContent = '🔍 Processing: ' + data;
+        resultDiv.style.display = 'block';
+        resultDiv.style.background = '#fff3cd';
+        resultDiv.style.color = '#856404';
+
+        fetch('/api/checkin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ qrData: data })
+        })
+        .then(r => r.json())
+        .then(result => {
+            resultDiv.textContent = result.message;
+            if (result.status === 'success') {
+                resultDiv.style.background = '#d4edda';
+                resultDiv.style.color = '#155724';
+            } else if (result.status === 'warning') {
+                resultDiv.style.background = '#fff3cd';
+                resultDiv.style.color = '#856404';
+            } else {
+                resultDiv.style.background = '#f8d7da';
+                resultDiv.style.color = '#721c24';
+            }
+        })
+        .catch(e => {
+            resultDiv.textContent = '❌ Error: ' + e.message;
+            resultDiv.style.background = '#f8d7da';
+            resultDiv.style.color = '#721c24';
+        });
+    }
+</script>
+</body>
+</html>

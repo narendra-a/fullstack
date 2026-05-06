@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('My QR Code')}"></head>
+<body>
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<div class="container" style="max-width:600px; margin:40px auto; text-align:center;">
+
+    <!-- Flash Messages (shown after registration redirect) -->
+    <div th:if="${successMessage}" class="alert alert-success animate-in" style="margin-bottom:1.5rem; font-size:1.05rem; font-weight:600;">
+        <span th:text="${successMessage}">Registration successful!</span>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger animate-in" style="margin-bottom:1.5rem;">
+        <span th:text="${errorMessage}">Error</span>
+    </div>
+
+    <div class="card" style="padding:2.5rem;">
+        <div style="font-size:2.5rem; margin-bottom:0.5rem;">📱</div>
+        <h1 style="font-size:1.5rem; margin-bottom:0.25rem;">Your Event QR Code</h1>
+        <p class="text-muted" style="margin-bottom:1.5rem;">
+            Present this QR code at the event entrance for check-in
+        </p>
+
+        <!-- QR Code Image -->
+        <div style="display:inline-block; padding:1rem; background:white; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.1); margin-bottom:1.5rem;">
+            <img th:src="'data:image/png;base64,' + ${qrBase64}"
+                 alt="QR Code" width="250" height="250"
+                 style="display:block;">
+        </div>
+
+        <!-- Event Info -->
+        <div class="info-card" style="background:var(--surface-2,#f8f9fa); border-radius:10px; padding:1.25rem; margin-bottom:1.5rem; text-align:left;">
+            <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.75rem;">
+                <span style="font-size:1.3rem;">🎯</span>
+                <strong th:text="${event.name}">Event Name</strong>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; font-size:0.9rem; color:var(--text-muted);">
+                <div>📅 <span th:text="${#temporals.format(event.eventDate, 'dd MMM yyyy')}">Date</span></div>
+                <div th:if="${event.eventTime != null}">⏰ <span th:text="${#temporals.format(event.eventTime, 'h:mm a')}">Time</span></div>
+                <div>📍 <span th:text="${event.location ?: 'TBD'}">Location</span></div>
+                <div>🏷️ <span th:text="${event.type}">Type</span></div>
+                <div>🏢 <span th:text="${event.department}">Dept</span></div>
+            </div>
+        </div>
+
+        <!-- Registration Info -->
+        <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:1.5rem; font-family:monospace; background:var(--surface-2,#f1f3f5); padding:0.5rem; border-radius:6px;">
+            Registration ID: #<span th:text="${registration.id}">0</span>
+            &nbsp;|&nbsp; Student: <span th:text="${student.name}">Name</span>
+        </div>
+
+        <!-- Attendance Status -->
+        <div th:if="${registration.attended}"
+             style="background:#d4edda; color:#155724; padding:0.75rem 1.25rem; border-radius:8px; margin-bottom:1rem; font-weight:600;">
+            ✅ Checked In — <span th:text="${#temporals.format(registration.checkedInAt, 'dd MMM yyyy HH:mm')}">Time</span>
+        </div>
+        <div th:if="${!registration.attended}"
+             style="background:#fff3cd; color:#856404; padding:0.75rem 1.25rem; border-radius:8px; margin-bottom:1rem; font-weight:600;">
+            ⏳ Not yet checked in — Show this QR at the venue
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="display:flex; gap:0.75rem; justify-content:center; flex-wrap:wrap; margin-top:0.5rem;">
+            <a th:href="@{'/events/' + ${event.id} + '/calendar.ics'}" class="btn btn-primary">
+                📅 Add to Calendar
+            </a>
+            <a th:href="@{'/events/' + ${event.id}}" class="btn btn-outline">
+                📋 Event Details
+            </a>
+            <a href="/student/dashboard" class="btn btn-outline">
+                🏠 Dashboard
+            </a>
+            <a href="/student/my-events" class="btn btn-ghost">
+                ← My Events
+            </a>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{layout :: footer}"></footer>
+<script th:replace="~{layout :: scripts}"></script>
+</body>
+</html>

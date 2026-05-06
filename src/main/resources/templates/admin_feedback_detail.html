@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Event Feedback Detail')}"></head>
+<body>
+<nav th:replace="~{layout :: navbar}"></nav>
+<div class="container" style="max-width:800px; margin:40px auto;">
+
+    <div style="margin-bottom:1.5rem;">
+        <a href="/admin/feedback" class="btn btn-outline" style="font-size:0.85rem;">← Back to Feedback</a>
+    </div>
+
+    <h1 style="font-size:1.8rem; font-weight:700; margin-bottom:0.5rem;" th:text="${event.name}">Event</h1>
+    <p class="text-muted" style="margin-bottom:1.5rem;">
+        📅 <span th:text="${#temporals.format(event.eventDate, 'dd MMM yyyy')}">Date</span>
+        &nbsp;|&nbsp; 📍 <span th:text="${event.location ?: 'TBD'}">Location</span>
+    </p>
+
+    <!-- Average Rating -->
+    <div class="card" style="padding:1.5rem; margin-bottom:1.5rem; display:flex; align-items:center; gap:2rem;">
+        <div style="text-align:center;">
+            <div style="font-size:3.5rem; font-weight:800; color:#f59e0b;" th:text="${averageRating ?: 'N/A'}">4.5</div>
+            <p class="text-muted" style="margin:0; font-size:0.85rem;">Average Rating</p>
+        </div>
+        <div>
+            <div style="color:#f59e0b; font-size:2rem;" th:if="${averageRating != null}">
+                <span th:each="i : ${#numbers.sequence(1,5)}">
+                    <span th:if="${averageRating ge i}" style="color:#f59e0b;">★</span>
+                    <span th:unless="${averageRating ge i}" style="color:#ccc;">☆</span>
+                </span>
+            </div>
+            <p class="text-muted" th:text="${#lists.size(feedbackList)} + ' total reviews'">0 reviews</p>
+        </div>
+    </div>
+
+    <!-- Reviews -->
+    <div th:if="${#lists.isEmpty(feedbackList)}" class="card" style="padding:2rem; text-align:center;">
+        <p class="text-muted">No feedback submitted for this event yet.</p>
+    </div>
+    <div th:if="${!#lists.isEmpty(feedbackList)}" style="display:grid; gap:1rem;">
+        <div th:each="fb : ${feedbackList}" class="card" style="padding:1.25rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                <div style="display:flex; align-items:center; gap:0.75rem;">
+                    <div style="width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,#6366f1,#8b5cf6);
+                         display:flex; align-items:center; justify-content:center; color:white; font-weight:700;"
+                         th:text="${#strings.substring(fb.student.name,0,1)}">A</div>
+                    <div>
+                        <div style="font-weight:600;" th:text="${fb.student.name}">Name</div>
+                        <div class="text-muted" style="font-size:0.75rem;" th:text="${fb.student.email}">email</div>
+                    </div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="color:#f59e0b;">
+                        <span th:each="i : ${#numbers.sequence(1,5)}">
+                            <span th:if="${i le fb.rating}" style="color:#f59e0b;">★</span>
+                            <span th:unless="${i le fb.rating}" style="color:#ccc;">☆</span>
+                        </span>
+                    </div>
+                    <div class="text-muted" style="font-size:0.75rem;" th:text="${#temporals.format(fb.submittedAt,'dd MMM yyyy')}">Date</div>
+                </div>
+            </div>
+            <p th:if="${fb.comment}" th:text="${fb.comment}" style="margin:0; color:var(--text-secondary);"></p>
+            <p th:if="${fb.comment == null or fb.comment == ''}" class="text-muted" style="margin:0; font-style:italic;">No written comment.</p>
+        </div>
+    </div>
+</div>
+<footer th:replace="~{layout :: footer}"></footer>
+<script th:replace="~{layout :: scripts}"></script>
+</body>
+</html>

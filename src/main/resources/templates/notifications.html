@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Notifications')}"></head>
+<body>
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<div class="container" style="max-width:700px; margin:40px auto;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+        <div>
+            <h1 style="font-size:1.8rem; font-weight:700; margin-bottom:0.25rem;">🔔 Notifications</h1>
+            <p class="text-muted" th:text="${unreadCount + ' unread'}">notifications</p>
+        </div>
+        <form action="/student/notifications/read" method="post">
+            <button type="submit" class="btn btn-outline" style="font-size:0.85rem;">Mark All Read</button>
+        </form>
+    </div>
+
+    <!-- Flash -->
+    <div th:if="${successMessage}" class="alert alert-success" style="margin-bottom:1rem;">
+        ✅ <span th:text="${successMessage}"></span>
+    </div>
+
+    <!-- Empty state -->
+    <div th:if="${#lists.isEmpty(notifications)}" class="card" style="padding:3rem; text-align:center;">
+        <div style="font-size:3rem; margin-bottom:1rem;">🔕</div>
+        <h2 style="font-size:1.2rem; margin-bottom:0.5rem;">All caught up!</h2>
+        <p class="text-muted">No notifications yet. Register for events to get updates.</p>
+        <a href="/" class="btn btn-primary" style="margin-top:1rem;">Browse Events</a>
+    </div>
+
+    <!-- Notifications list -->
+    <div th:if="${!#lists.isEmpty(notifications)}" style="display:grid; gap:0.75rem;">
+        <div th:each="notif : ${notifications}"
+             th:class="${!notif.read ? 'card notif-unread' : 'card'}"
+             style="padding:1rem 1.25rem; border-left:4px solid; transition:all 0.2s;"
+             th:style="${!notif.read ? 'border-left-color:#6366f1; background:var(--surface-2,#f0f0ff);' : 'border-left-color:var(--border-color,#e5e7eb);'}">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:1rem;">
+                <div style="flex:1;">
+                    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.25rem;">
+                        <span th:if="${!notif.read}"
+                              style="width:8px; height:8px; border-radius:50%; background:#6366f1; display:inline-block; flex-shrink:0;"></span>
+                        <strong style="font-size:0.95rem;" th:text="${notif.title}">Title</strong>
+                    </div>
+                    <p style="margin:0; font-size:0.9rem; color:var(--text-secondary);" th:text="${notif.message}">Message</p>
+                </div>
+                <span class="text-muted" style="font-size:0.75rem; white-space:nowrap; flex-shrink:0;"
+                      th:text="${#temporals.format(notif.createdAt, 'dd MMM HH:mm')}">Time</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{layout :: footer}"></footer>
+<script th:replace="~{layout :: scripts}"></script>
+</body>
+</html>

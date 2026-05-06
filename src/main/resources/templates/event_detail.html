@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Event Details')}"></head>
+<body>
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<main>
+    <div style="max-width:900px; margin:0 auto;" class="animate-in">
+
+        <!-- Back link -->
+        <div style="margin-bottom:24px;">
+            <a href="/" class="action-link">&larr; Back to Events</a>
+        </div>
+
+        <!-- ═══ TWO-COLUMN GRID: Event Info + Details Sidebar ═══ -->
+        <div style="display:grid; grid-template-columns:1fr 320px; gap:24px; align-items:start;">
+
+            <!-- LEFT: Main Event Card -->
+            <div class="form-wrap form-wrap-wide" style="max-width:100%; margin:0;">
+
+                <!-- Cover Image -->
+                <div style="margin:-32px -32px 24px -32px; border-radius:var(--radius-lg) var(--radius-lg) 0 0; overflow:hidden; height:200px;">
+                    <img th:src="@{'/img/event_' + ${event.type != null ? (
+                        event.type == 'Workshop' ? 'workshop' :
+                        event.type == 'Seminar' ? 'seminar' :
+                        event.type == 'Cultural' ? 'cultural' :
+                        event.type == 'Sports' ? 'sports' :
+                        event.type == 'Hackathon' ? 'hackathon' :
+                        event.type == 'Symposium' ? 'symposium' :
+                        event.type == 'Exhibition' ? 'exhibition' : 'default'
+                    ) : 'default'} + '.png'}"
+                         style="width:100%; height:100%; object-fit:cover;"
+                         th:alt="${event.type} + ' event illustration'">
+                </div>
+
+                <!-- Badge + Type -->
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+                    <span class="badge"
+                          th:classappend="${event.type == 'Workshop'} ? 'badge-workshop'
+                                        : (${event.type == 'Seminar'} ? 'badge-seminar'
+                                        : (${event.type == 'Cultural'} ? 'badge-cultural'
+                                        : (${event.type == 'Sports'} ? 'badge-sports'
+                                        : (${event.type == 'Hackathon'} ? 'badge-hackathon'
+                                        : (${event.type == 'Symposium'} ? 'badge-symposium'
+                                        : (${event.type == 'Exhibition'} ? 'badge-exhibition' : 'badge-default'))))))"
+                          th:text="${event.type}">Workshop</span>
+                    <span th:if="${isRegistered}" class="reg-status confirmed">You're Registered</span>
+                </div>
+
+                <!-- Title -->
+                <h1 style="font-size:1.5rem; font-weight:700; margin-bottom:8px; letter-spacing:-0.3px;"
+                    th:text="${event.name}">Event Name</h1>
+
+                <!-- Description -->
+                <p style="color:var(--text-secondary); font-size:0.9375rem; line-height:1.7; margin-bottom:24px;"
+                   th:text="${event.description}">Description</p>
+
+                <hr class="divider">
+
+                <!-- Details grid -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px 32px; margin-bottom:24px;">
+                    <div>
+                        <div style="font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:4px;">Date &amp; Time</div>
+                        <div style="font-weight:600;">
+                            <span th:text="${#temporals.format(event.eventDate, 'MMMM d, yyyy')}">May 15, 2026</span>
+                            <span th:if="${event.eventTime != null}" th:text="' at ' + ${#temporals.format(event.eventTime, 'h:mm a')}"> at 10:00 AM</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:4px;">Average Rating</div>
+                        <div style="font-weight:600; display:flex; align-items:center; gap:4px;">
+                            <span th:if="${averageRating != null}" style="color:#f59e0b;">★ <span th:text="${averageRating}">4.5</span></span>
+                            <span th:if="${averageRating == null}" style="color:var(--text-muted); font-weight:400;">No ratings yet</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:4px;">Department</div>
+                        <div style="font-weight:600;" th:text="${event.department}">Computer Science</div>
+                    </div>
+                    <div th:if="${event.location}">
+                        <div style="font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:4px;">Location</div>
+                        <div style="font-weight:600;" th:text="${event.location}">CS Lab 301</div>
+                    </div>
+                </div>
+
+                <!-- Capacity bar -->
+                <div th:if="${event.capacity}" style="margin-bottom:24px;">
+                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--text-muted); margin-bottom:6px;">
+                        <span><span th:text="${registrationCount}">5</span> / <span th:text="${event.capacity}">40</span> registered</span>
+                        <span th:if="${event.capacity - registrationCount <= 5}" style="color:var(--warning); font-weight:600;">Few seats left!</span>
+                    </div>
+                    <div class="progress-bar-wrap">
+                        <div class="progress-bar-fill"
+                             th:style="'width:' + ${(registrationCount * 100) / event.capacity} + '%'"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: Actions Sidebar -->
+            <div style="display:flex; flex-direction:column; gap:16px; position:sticky; top:80px;">
+                <!-- Registration Card -->
+                <div class="card" style="padding:20px;">
+                    <h3 style="font-size:0.95rem; font-weight:600; margin-bottom:16px;">Quick Actions</h3>
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <a th:if="${!isRegistered}"
+                           th:href="@{'/events/register/' + ${event.id}}"
+                           class="btn btn-primary btn-block btn-lg"
+                           th:text="${session.studentName != null ? 'Quick Register' : 'Register Now'}">Register</a>
+                        <span th:if="${isRegistered}" class="btn btn-outline btn-block btn-lg" style="pointer-events:none; opacity:0.8; font-weight:700; text-align:center;">
+                            ✅ Registered
+                        </span>
+
+                        <a th:href="@{'/events/' + ${event.id} + '/calendar.ics'}" class="btn btn-outline btn-block"
+                           onclick="event.preventDefault(); window.open(this.href, '_blank');">
+                            📅 Add to Calendar
+                        </a>
+                        <a th:href="@{'/events/' + ${event.id} + '/discussion'}" class="btn btn-outline btn-block">
+                            💬 Discussion Forum
+                        </a>
+                        <!-- Only show feedback button if event has passed -->
+                        <a th:if="${event.eventDate.isBefore(#temporals.createToday()) or event.eventDate.isEqual(#temporals.createToday())}"
+                           th:href="@{'/feedback/' + ${event.id}}" class="btn btn-outline btn-block"
+                           th:classappend="${hasFeedback} ? 'disabled'">
+                            ⭐ <span th:text="${hasFeedback ? 'Feedback Sent' : 'Give Feedback'}">Give Feedback</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Event Info Card -->
+                <div class="card" style="padding:20px;">
+                    <h3 style="font-size:0.95rem; font-weight:600; margin-bottom:12px;">Event Info</h3>
+                    <div style="display:flex; flex-direction:column; gap:10px; font-size:0.875rem;">
+                        <div style="display:flex; justify-content:space-between;">
+                            <span style="color:var(--text-muted);">Type</span>
+                            <span style="font-weight:600;" th:text="${event.type}">Workshop</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between;">
+                            <span style="color:var(--text-muted);">Department</span>
+                            <span style="font-weight:600;" th:text="${event.department}">CS</span>
+                        </div>
+                        <div th:if="${event.capacity}" style="display:flex; justify-content:space-between;">
+                            <span style="color:var(--text-muted);">Capacity</span>
+                            <span style="font-weight:600;" th:text="${registrationCount + '/' + event.capacity}">5/40</span>
+                        </div>
+                        <div th:if="${averageRating != null}" style="display:flex; justify-content:space-between;">
+                            <span style="color:var(--text-muted);">Rating</span>
+                            <span style="font-weight:600; color:#f59e0b;">★ <span th:text="${averageRating}">4.5</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{layout :: footer}"></footer>
+<th:block th:replace="~{layout :: scripts}"></th:block>
+</body>
+</html>

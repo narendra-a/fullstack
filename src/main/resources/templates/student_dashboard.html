@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Student Dashboard')}"></head>
+<body>
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<!-- Dashboard Banner -->
+<div class="dashboard-banner">
+    <div class="dashboard-banner-inner">
+        <h1 class="dashboard-greeting">
+            Welcome back, <span class="name" th:text="${studentName}">Student</span>
+        </h1>
+        <p class="dashboard-meta">
+            <span th:text="${studentEmail}">email</span>
+            &nbsp;&middot;&nbsp;
+            <span th:text="${#lists.size(myRegistrations)} + ' event(s) registered'">0 events registered</span>
+        </p>
+        <div class="dashboard-actions">
+            <!-- Notifications Link -->
+            <a href="/student/notifications" class="btn btn-outline" style="position:relative;">
+                🔔 Notifications
+                <span th:if="${unreadCount > 0}" class="notif-badge" th:text="${unreadCount}"
+                      style="position:absolute; top:-8px; right:-8px; background:var(--danger); color:white;
+                             border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:0.7rem;">0</span>
+            </a>
+            <!-- Points Link -->
+            <a href="/student/points" class="btn btn-outline">
+                ⭐ <span th:text="${studentPoints != null ? studentPoints.totalPoints : 0}">0</span> Points
+            </a>
+            <a href="/" class="btn btn-primary">Browse Events</a>
+            <a href="/student/my-events" th:href="@{/student/my-events(email=${studentEmail})}" class="btn btn-outline">My Registrations</a>
+            <a href="/student/logout" class="btn btn-ghost">Sign Out</a>
+        </div>
+    </div>
+</div>
+
+<main>
+    <!-- Alerts -->
+    <div th:if="${successMessage}" class="alert alert-success animate-in" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-danger animate-in" th:text="${errorMessage}"></div>
+
+    <!-- Stats Row -->
+    <div class="stats-grid animate-in">
+        <div class="stat-card">
+            <div class="stat-label">Total Events</div>
+            <div class="stat-num" th:text="${totalEvents}">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">My Points</div>
+            <div class="stat-num" th:text="${studentPoints != null ? studentPoints.totalPoints : 0}">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Registrations</div>
+            <div class="stat-num" th:text="${#lists.size(myRegistrations)}">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Active Groups</div>
+            <div class="stat-num" th:text="${deptCount}">0</div>
+        </div>
+    </div>
+
+    <!-- Section Header with Filters -->
+    <div class="section-header animate-in">
+        <h2 class="section-title">All Campus Events</h2>
+        <span class="chip" th:text="'Showing: ' + ${#lists.size(events)} + ' events'">Showing: 0 events</span>
+    </div>
+
+    <!-- Event Type Filter Pills -->
+    <div class="filter-pills animate-in">
+        <a href="/student/dashboard" class="filter-pill" id="filter-all"
+           th:classappend="${selectedType == null} ? 'active'">All</a>
+        <a href="/student/dashboard?type=Workshop" class="filter-pill"
+           th:classappend="${selectedType == 'Workshop'} ? 'active'">Workshop</a>
+        <a href="/student/dashboard?type=Seminar" class="filter-pill"
+           th:classappend="${selectedType == 'Seminar'} ? 'active'">Seminar</a>
+        <a href="/student/dashboard?type=Cultural" class="filter-pill"
+           th:classappend="${selectedType == 'Cultural'} ? 'active'">Cultural</a>
+        <a href="/student/dashboard?type=Sports" class="filter-pill"
+           th:classappend="${selectedType == 'Sports'} ? 'active'">Sports</a>
+        <a href="/student/dashboard?type=Hackathon" class="filter-pill"
+           th:classappend="${selectedType == 'Hackathon'} ? 'active'">Hackathon</a>
+        <a href="/student/dashboard?type=Symposium" class="filter-pill"
+           th:classappend="${selectedType == 'Symposium'} ? 'active'">Symposium</a>
+        <a href="/student/dashboard?type=Exhibition" class="filter-pill"
+           th:classappend="${selectedType == 'Exhibition'} ? 'active'">Exhibition</a>
+    </div>
+
+    <!-- Events Grid -->
+    <div class="grid animate-in">
+        <div th:each="event : ${events}" class="event-card">
+            <!-- Cover image based on event type -->
+            <div class="event-card-cover">
+                <img th:src="@{'/img/event_' + ${event.type != null ? (
+                    event.type == 'Workshop' ? 'workshop' :
+                    event.type == 'Seminar' ? 'seminar' :
+                    event.type == 'Cultural' ? 'cultural' :
+                    event.type == 'Sports' ? 'sports' :
+                    event.type == 'Hackathon' ? 'hackathon' :
+                    event.type == 'Symposium' ? 'symposium' :
+                    event.type == 'Exhibition' ? 'exhibition' : 'default'
+                ) : 'default'} + '.png'}"
+                     th:alt="${event.type} + ' event illustration'">
+            </div>
+            <div class="event-card-body">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+                    <span class="badge"
+                          th:classappend="${event.type == 'Workshop'} ? 'badge-workshop'
+                                        : (${event.type == 'Seminar'} ? 'badge-seminar'
+                                        : (${event.type == 'Cultural'} ? 'badge-cultural'
+                                        : (${event.type == 'Sports'} ? 'badge-sports'
+                                        : (${event.type == 'Hackathon'} ? 'badge-hackathon'
+                                        : (${event.type == 'Symposium'} ? 'badge-symposium'
+                                        : (${event.type == 'Exhibition'} ? 'badge-exhibition' : 'badge-default'))))))"
+                          th:text="${event.type}">Workshop</span>
+                    <span th:if="${registeredEventIds.contains(event.id)}" class="reg-status confirmed">Registered</span>
+                </div>
+                <a th:href="@{'/events/' + ${event.id}}" style="text-decoration:none; color:inherit;">
+                    <h3 class="event-card-title" th:text="${event.name}">Event Name</h3>
+                </a>
+                <p class="event-card-desc" th:text="${event.description}">Description goes here.</p>
+
+                <!-- Ratings & Meta -->
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                    <div th:if="${avgRatings.containsKey(event.id)}" style="display:flex; align-items:center; gap:4px;">
+                        <span style="color:#f59e0b; font-size:1.1rem;">★</span>
+                        <strong th:text="${avgRatings[event.id]}" style="font-size:0.9rem; color:var(--text-secondary);">4.5</strong>
+                    </div>
+                    <div class="event-card-meta" style="margin-bottom:0;">
+                        <span th:text="${#temporals.format(event.eventDate, 'MMM d, yyyy')}">May 15, 2026</span>
+                    </div>
+                </div>
+
+                <div class="event-card-meta">
+                    <span th:text="${event.department}">Department</span>
+                    <span th:if="${event.location}">&middot;</span>
+                    <span th:if="${event.location}" th:text="${event.location}">Location</span>
+                </div>
+
+                <!-- Capacity indicator -->
+                <div th:if="${event.capacity}" style="margin-top:12px;">
+                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--text-muted); margin-bottom:4px;">
+                        <span th:text="${(regCounts.containsKey(event.id) ? regCounts[event.id] : 0) + '/' + event.capacity + ' registered'}">5/40 registered</span>
+                    </div>
+                    <div class="progress-bar-wrap">
+                        <div class="progress-bar-fill"
+                             th:style="'width:' + ${((regCounts.containsKey(event.id) ? regCounts[event.id] : 0) * 100) / event.capacity} + '%'"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="event-card-footer">
+                <a th:if="${registeredEventIds.contains(event.id)}"
+                   th:href="@{'/events/' + ${event.id}}"
+                   class="btn btn-outline btn-block">View Details</a>
+                <a th:unless="${registeredEventIds.contains(event.id)}"
+                   th:href="@{'/events/register/' + ${event.id}}"
+                   class="btn btn-primary btn-block">Quick Register</a>
+            </div>
+        </div>
+
+        <div th:if="${#lists.isEmpty(events)}" class="empty-state" style="grid-column:1/-1;">
+            <div class="empty-state-icon">&#128269;</div>
+            <h3>No events in this category</h3>
+            <p>Try selecting a different filter above.</p>
+            <a href="/student/dashboard" class="btn btn-primary">View All Events</a>
+        </div>
+    </div>
+
+    <!-- My Registered Events -->
+    <div th:if="${!#lists.isEmpty(myRegistrations)}" style="margin-top:48px;" class="animate-in">
+        <div class="section-header">
+            <h2 class="section-title">My Registered Events</h2>
+            <span class="chip" th:text="${#lists.size(myRegistrations)} + ' registration(s)'">0 registrations</span>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Event</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>QR Code</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="reg : ${myRegistrations}">
+                        <td>
+                            <a th:href="@{'/events/' + ${reg.event.id}}" style="font-weight:600; color:var(--primary); text-decoration:none;"
+                               th:text="${reg.event.name}">Event</a>
+                        </td>
+                        <td th:text="${#temporals.format(reg.event.eventDate, 'MMM d, yyyy')}">Date</td>
+                        <td>
+                            <span th:if="${reg.attended}" class="reg-status confirmed">Checked In</span>
+                            <span th:unless="${reg.attended}" class="reg-status pending">Registered</span>
+                        </td>
+                        <td>
+                            <a th:href="@{'/student/qr/' + ${reg.id}}" class="btn btn-ghost btn-sm">📱 View QR</a>
+                        </td>
+                        <td>
+                            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                                <a th:href="@{'/events/' + ${reg.event.id} + '/calendar.ics'}" class="btn btn-ghost btn-sm"
+                                   onclick="event.preventDefault(); window.open(this.href, '_blank');">📅 Calendar</a>
+                                <a th:href="@{'/events/' + ${reg.event.id} + '/discussion'}" class="btn btn-ghost btn-sm">💬 Forum</a>
+                                <a th:if="${reg.event.eventDate.isBefore(#temporals.createToday()) or reg.event.eventDate.isEqual(#temporals.createToday())}"
+                                   th:href="@{'/feedback/' + ${reg.event.id}}" class="btn btn-ghost btn-sm" style="color:#f59e0b;">⭐ Feedback</a>
+                                <form th:action="@{/student/cancel-registration}" method="post" style="display:inline;">
+                                    <input type="hidden" name="eventId" th:value="${reg.event.id}"/>
+                                    <button type="submit" class="btn btn-ghost btn-sm" style="color:var(--danger);"
+                                            onclick="return confirm('Cancel your registration for this event?')">Cancel</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</main>
+
+<footer th:replace="~{layout :: footer}"></footer>
+<th:block th:replace="~{layout :: scripts}"></th:block>
+</body>
+</html>

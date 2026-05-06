@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Event Feedback')}"></head>
+<body>
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<main>
+    <div class="animate-in" style="max-width:1100px; margin:0 auto;">
+
+        <!-- Header -->
+        <div style="text-align:center; margin-bottom:2rem;">
+            <div style="font-size:2.5rem;">⭐</div>
+            <h1 style="font-size:1.8rem; font-weight:700;" th:text="${event.name}">Event Name</h1>
+            <p class="text-muted">Share your experience and help future attendees</p>
+        </div>
+
+        <!-- Flash messages -->
+        <div th:if="${successMessage}" class="alert alert-success" style="margin-bottom:1rem;">
+            <span th:text="${successMessage}"></span>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-error" style="margin-bottom:1rem;">
+            <span th:text="${errorMessage}"></span>
+        </div>
+
+        <!-- Already Submitted -->
+        <div th:if="${alreadySubmitted}" class="card" style="padding:2rem; text-align:center; margin-bottom:1.5rem; max-width:600px; margin-left:auto; margin-right:auto;">
+            <div style="font-size:2rem; margin-bottom:0.5rem;">✅</div>
+            <h2 style="font-size:1.2rem; margin-bottom:0.5rem;">Feedback Already Submitted</h2>
+            <div th:if="${existingFeedback}" style="margin-top:1rem;">
+                <div class="star-display" th:each="i : ${#numbers.sequence(1,5)}">
+                    <span th:if="${i le existingFeedback.rating}" style="color:#f59e0b;font-size:1.5rem;">★</span>
+                    <span th:unless="${i le existingFeedback.rating}" style="color:#ccc;font-size:1.5rem;">☆</span>
+                </div>
+                <p th:if="${existingFeedback.comment}" style="margin-top:0.75rem; font-style:italic; color:var(--text-muted);">
+                    &ldquo;<span th:text="${existingFeedback.comment}">comment</span>&rdquo;
+                </p>
+            </div>
+            <a th:href="@{'/events/' + ${event.id}}" class="btn btn-outline" style="margin-top:1rem;">Back to Event</a>
+        </div>
+
+        <!-- TWO-COLUMN GRID: Form + Rating Summary -->
+        <div th:if="${!alreadySubmitted}" style="display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:start;">
+
+            <!-- LEFT: Feedback Form -->
+            <div class="card" style="padding:2rem;">
+                <h2 style="font-size:1.2rem; font-weight:600; margin-bottom:1.5rem;">Rate This Event</h2>
+                <form th:action="@{'/feedback/' + ${event.id}}" method="post">
+                    <!-- Star Rating -->
+                    <div style="margin-bottom:1.5rem;">
+                        <label style="font-weight:600; display:block; margin-bottom:0.75rem;">Your Rating *</label>
+                        <div class="star-rating-input" id="starRating">
+                            <input type="hidden" name="rating" id="ratingValue" value="5">
+                            <span th:each="i : ${#numbers.sequence(5,1,-1)}"
+                                  class="star-btn"
+                                  th:data-value="${i}"
+                                  th:id="'star-' + ${i}"
+                                  onclick="setRating(this.dataset.value)"
+                                  style="font-size:2.5rem; cursor:pointer; color:#f59e0b; transition:transform 0.1s;">★</span>
+                        </div>
+                        <p class="text-muted" id="ratingLabel" style="margin-top:0.5rem;">Excellent</p>
+                    </div>
+
+                    <!-- Comment -->
+                    <div style="margin-bottom:1.5rem;">
+                        <label for="comment" style="font-weight:600; display:block; margin-bottom:0.5rem;">Your Feedback</label>
+                        <textarea id="comment" name="comment" rows="5"
+                                  placeholder="Share what you liked, what could be improved..."
+                                  style="width:100%; resize:vertical;"></textarea>
+                    </div>
+
+                    <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+                        <button type="submit" class="btn btn-primary">Submit Feedback ⭐</button>
+                        <a th:href="@{'/events/' + ${event.id}}" class="btn btn-outline">Cancel</a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- RIGHT: Rating Summary -->
+            <div style="display:flex; flex-direction:column; gap:20px;">
+                <!-- Average Rating Card -->
+                <div class="card" style="padding:1.5rem;">
+                    <h2 style="font-size:1.1rem; font-weight:600; margin-bottom:1rem;">📊 Event Ratings Summary</h2>
+                    <div th:if="${averageRating != null}">
+                        <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1rem;">
+                            <div style="font-size:3rem; font-weight:700; color:#f59e0b;" th:text="${averageRating}">4.5</div>
+                            <div>
+                                <div style="color:#f59e0b; font-size:1.5rem;">
+                                    <span th:each="i : ${#numbers.sequence(1,5)}">
+                                        <span th:if="${averageRating ge i}">★</span>
+                                        <span th:unless="${averageRating ge i}">☆</span>
+                                    </span>
+                                </div>
+                                <p class="text-muted" th:text="${#lists.size(feedbackList)} + ' reviews'">0 reviews</p>
+                            </div>
+                        </div>
+                    </div>
+                    <p th:if="${averageRating == null}" class="text-muted">No ratings yet. Be the first!</p>
+                </div>
+
+                <!-- Reviews List Card -->
+                <div th:if="${!#lists.isEmpty(feedbackList)}" class="card" style="padding:1.5rem; max-height:420px; overflow-y:auto;">
+                    <h2 style="font-size:1.1rem; font-weight:600; margin-bottom:1rem;">💬 Reviews</h2>
+                    <div th:each="fb : ${feedbackList}" style="border-bottom:1px solid var(--border-color,#e5e7eb); padding:1rem 0;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                            <div style="display:flex; align-items:center; gap:0.75rem;">
+                                <div style="width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,var(--primary),#F0506E); display:flex; align-items:center; justify-content:center; color:white; font-weight:700; font-size:0.9rem;"
+                                     th:text="${#strings.substring(fb.student.name,0,1)}">A</div>
+                                <span style="font-weight:600;" th:text="${fb.student.name}">Student</span>
+                            </div>
+                            <div>
+                                <span th:each="i : ${#numbers.sequence(1,5)}">
+                                    <span th:if="${i le fb.rating}" style="color:#f59e0b;">★</span>
+                                    <span th:unless="${i le fb.rating}" style="color:#ccc;">☆</span>
+                                </span>
+                            </div>
+                        </div>
+                        <p th:if="${fb.comment}" th:text="${fb.comment}"
+                           style="margin:0; color:var(--text-secondary); line-height:1.5;"></p>
+                        <p class="text-muted" style="font-size:0.75rem; margin-top:0.5rem;"
+                           th:text="${#temporals.format(fb.submittedAt, 'dd MMM yyyy')}">Date</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary + Reviews when already submitted -->
+        <div th:if="${alreadySubmitted}" style="display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:start; max-width:900px; margin:0 auto;">
+            <div class="card" style="padding:1.5rem;">
+                <h2 style="font-size:1.1rem; font-weight:600; margin-bottom:1rem;">📊 Event Ratings Summary</h2>
+                <div th:if="${averageRating != null}">
+                    <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1rem;">
+                        <div style="font-size:3rem; font-weight:700; color:#f59e0b;" th:text="${averageRating}">4.5</div>
+                        <div>
+                            <div style="color:#f59e0b; font-size:1.5rem;">
+                                <span th:each="i : ${#numbers.sequence(1,5)}">
+                                    <span th:if="${averageRating ge i}">★</span>
+                                    <span th:unless="${averageRating ge i}">☆</span>
+                                </span>
+                            </div>
+                            <p class="text-muted" th:text="${#lists.size(feedbackList)} + ' reviews'">0 reviews</p>
+                        </div>
+                    </div>
+                </div>
+                <p th:if="${averageRating == null}" class="text-muted">No ratings yet.</p>
+            </div>
+
+            <div th:if="${!#lists.isEmpty(feedbackList)}" class="card" style="padding:1.5rem; max-height:420px; overflow-y:auto;">
+                <h2 style="font-size:1.1rem; font-weight:600; margin-bottom:1rem;">💬 Reviews</h2>
+                <div th:each="fb : ${feedbackList}" style="border-bottom:1px solid var(--border-color,#e5e7eb); padding:1rem 0;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                        <div style="display:flex; align-items:center; gap:0.75rem;">
+                            <div style="width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,var(--primary),#F0506E); display:flex; align-items:center; justify-content:center; color:white; font-weight:700; font-size:0.9rem;"
+                                 th:text="${#strings.substring(fb.student.name,0,1)}">A</div>
+                            <span style="font-weight:600;" th:text="${fb.student.name}">Student</span>
+                        </div>
+                        <div>
+                            <span th:each="i : ${#numbers.sequence(1,5)}">
+                                <span th:if="${i le fb.rating}" style="color:#f59e0b;">★</span>
+                                <span th:unless="${i le fb.rating}" style="color:#ccc;">☆</span>
+                            </span>
+                        </div>
+                    </div>
+                    <p th:if="${fb.comment}" th:text="${fb.comment}"
+                       style="margin:0; color:var(--text-secondary); line-height:1.5;"></p>
+                    <p class="text-muted" style="font-size:0.75rem; margin-top:0.5rem;"
+                       th:text="${#temporals.format(fb.submittedAt, 'dd MMM yyyy')}">Date</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<footer th:replace="~{layout :: footer}"></footer>
+<th:block th:replace="~{layout :: scripts}"></th:block>
+<script>
+    const labels = {1:'Poor',2:'Fair',3:'Good',4:'Very Good',5:'Excellent'};
+    let currentRating = 5;
+    function setRating(val) {
+        currentRating = parseInt(val);
+        document.getElementById('ratingValue').value = currentRating;
+        document.getElementById('ratingLabel').textContent = labels[currentRating];
+        document.querySelectorAll('.star-btn').forEach(s => {
+            s.style.opacity = parseInt(s.dataset.value) <= currentRating ? '1' : '0.3';
+            s.style.transform = parseInt(s.dataset.value) <= currentRating ? 'scale(1.1)' : 'scale(1)';
+        });
+    }
+    document.addEventListener('DOMContentLoaded', () => setRating(5));
+</script>
+</body>
+</html>

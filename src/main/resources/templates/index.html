@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Upcoming Events')}"></head>
+<body>
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<!-- Hero -->
+<section class="hero">
+    <div class="hero-inner">
+        <h1>Discover Campus Events</h1>
+        <p>Explore workshops, seminars, hackathons and more happening across campus. Find something that interests you and register in seconds.</p>
+        <div class="hero-actions">
+            <a href="/student/dashboard" class="btn btn-primary btn-lg">Student Dashboard</a>
+            <a href="/student/my-events" class="btn btn-outline btn-lg">My Registrations</a>
+        </div>
+    </div>
+    <div class="hero-illustration">
+        <img th:src="@{/img/hero_campus.png}" alt="Campus Events Illustration">
+    </div>
+</section>
+
+<main>
+    <!-- Alerts -->
+    <div th:if="${successMessage}" class="alert alert-success animate-in" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-danger animate-in" th:text="${errorMessage}"></div>
+
+    <!-- Top Rated Events Section -->
+    <div th:if="${!#lists.isEmpty(topRatedEvents)}" style="margin-bottom:48px;">
+        <div class="section-header">
+            <h2 class="section-title">⭐ Top Rated This Month</h2>
+            <p style="font-size:0.875rem; color:var(--text-muted);">Events students are loving the most</p>
+        </div>
+        <div class="grid">
+            <div th:each="event : ${topRatedEvents}" class="event-card animate-in" style="border-color:rgba(245, 158, 11, 0.3);">
+                <!-- Cover image based on event type -->
+                <div class="event-card-cover">
+                    <img th:src="@{'/img/event_' + ${event.type != null ? (
+                        event.type == 'Workshop' ? 'workshop' :
+                        event.type == 'Seminar' ? 'seminar' :
+                        event.type == 'Cultural' ? 'cultural' :
+                        event.type == 'Sports' ? 'sports' :
+                        event.type == 'Hackathon' ? 'hackathon' :
+                        event.type == 'Symposium' ? 'symposium' :
+                        event.type == 'Exhibition' ? 'exhibition' : 'default'
+                    ) : 'default'} + '.png'}"
+                         th:alt="${event.type} + ' event illustration'">
+                </div>
+                <div class="event-card-body">
+                     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+                        <span class="badge" style="background:#fef3c7; color:#92400e;">🏆 Top Rated</span>
+                        <div style="display:flex; align-items:center; gap:4px;">
+                            <span style="color:#f59e0b;">★</span>
+                            <strong th:text="${avgRatings[event.id]}">4.5</strong>
+                        </div>
+                    </div>
+                    <a th:href="@{'/events/' + ${event.id}}" style="text-decoration:none; color:inherit;">
+                        <h3 class="event-card-title" th:text="${event.name}">Event Name</h3>
+                    </a>
+                    <div class="event-card-meta" style="margin-top:8px;">
+                        <span th:text="${event.department}">Dept</span> &middot;
+                        <span th:text="${#temporals.format(event.eventDate, 'MMM d')}">Date</span>
+                    </div>
+                </div>
+                <div class="event-card-footer">
+                    <a th:href="@{'/events/' + ${event.id}}" class="btn btn-primary btn-block">Explore Event</a>
+                </div>
+            </div>
+        </div>
+        <hr class="divider">
+    </div>
+
+    <div class="section-header" style="margin-top:8px;">
+        <h2 class="section-title">Upcoming Events</h2>
+        <span class="chip" th:text="'Total: ' + ${#lists.size(events)} + ' events'">Total: 0 events</span>
+    </div>
+
+    <div class="grid">
+        <div th:each="event : ${events}" class="event-card animate-in">
+            <!-- Cover image based on event type -->
+            <div class="event-card-cover">
+                <img th:src="@{'/img/event_' + ${event.type != null ? (
+                    event.type == 'Workshop' ? 'workshop' :
+                    event.type == 'Seminar' ? 'seminar' :
+                    event.type == 'Cultural' ? 'cultural' :
+                    event.type == 'Sports' ? 'sports' :
+                    event.type == 'Hackathon' ? 'hackathon' :
+                    event.type == 'Symposium' ? 'symposium' :
+                    event.type == 'Exhibition' ? 'exhibition' : 'default'
+                ) : 'default'} + '.png'}"
+                     th:alt="${event.type} + ' event illustration'">
+            </div>
+            <div class="event-card-body">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+                    <span class="badge"
+                          th:classappend="${event.type == 'Workshop'} ? 'badge-workshop'
+                                        : (${event.type == 'Seminar'} ? 'badge-seminar'
+                                        : (${event.type == 'Cultural'} ? 'badge-cultural'
+                                        : (${event.type == 'Sports'} ? 'badge-sports'
+                                        : (${event.type == 'Hackathon'} ? 'badge-hackathon'
+                                        : (${event.type == 'Symposium'} ? 'badge-symposium'
+                                        : (${event.type == 'Exhibition'} ? 'badge-exhibition' : 'badge-default'))))))"
+                          th:text="${event.type}">Workshop</span>
+                    <span th:if="${registeredEventIds.contains(event.id)}" class="reg-status confirmed">Registered</span>
+                </div>
+                <a th:href="@{'/events/' + ${event.id}}" style="text-decoration:none; color:inherit;">
+                    <h3 class="event-card-title" th:text="${event.name}">Event Name</h3>
+                </a>
+                <p class="event-card-desc" th:text="${event.description}">Description</p>
+                <!-- Ratings & Meta -->
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                    <div th:if="${avgRatings.containsKey(event.id)}" style="display:flex; align-items:center; gap:4px;">
+                        <span style="color:#f59e0b; font-size:1.1rem;">★</span>
+                        <strong th:text="${avgRatings[event.id]}" style="font-size:0.9rem; color:var(--text-secondary);">4.5</strong>
+                    </div>
+                    <div class="event-card-meta" style="margin-bottom:0;">
+                        <span th:text="${#temporals.format(event.eventDate, 'MMM d, yyyy')}">May 15, 2026</span>
+                        <span th:if="${event.eventTime != null}" th:text="' at ' + ${#temporals.format(event.eventTime, 'h:mm a')}"> at 10:00 AM</span>
+                    </div>
+                </div>
+
+                <div class="event-card-meta">
+                    <span th:text="${event.department}">Department</span>
+                    <span th:if="${event.location}">&middot;</span>
+                    <span th:if="${event.location}" th:text="${event.location}">Location</span>
+                </div>
+
+                <!-- Capacity indicator -->
+                <div th:if="${event.capacity}" style="margin-top:12px;">
+                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--text-muted); margin-bottom:4px;">
+                        <span th:text="${(regCounts.containsKey(event.id) ? regCounts[event.id] : 0) + '/' + event.capacity + ' registered'}">5/40 registered</span>
+                        <span th:if="${event.capacity - (regCounts.containsKey(event.id) ? regCounts[event.id] : 0) <= 5}"
+                              style="color:var(--warning); font-weight:600;">Few seats left</span>
+                    </div>
+                    <div class="progress-bar-wrap">
+                        <div class="progress-bar-fill"
+                             th:style="'width:' + ${((regCounts.containsKey(event.id) ? regCounts[event.id] : 0) * 100) / event.capacity} + '%'"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="event-card-footer">
+                <!-- Already registered -->
+                <a th:if="${registeredEventIds.contains(event.id)}"
+                   th:href="@{'/events/' + ${event.id}}"
+                   class="btn btn-outline btn-block">View Details</a>
+                <!-- Not registered -->
+                <a th:unless="${registeredEventIds.contains(event.id)}"
+                   th:href="@{'/events/register/' + ${event.id}}"
+                   class="btn btn-primary btn-block"
+                   th:text="${session.studentName != null} ? 'Quick Register' : 'Register'">Register</a>
+            </div>
+        </div>
+
+        <div th:if="${#lists.isEmpty(events)}" class="empty-state" style="grid-column:1/-1;">
+            <div class="empty-state-icon">&#128197;</div>
+            <h3>No events yet</h3>
+            <p>No upcoming events at the moment. Check back soon!</p>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{layout :: footer}"></footer>
+<th:block th:replace="~{layout :: scripts}"></th:block>
+</body>
+</html>

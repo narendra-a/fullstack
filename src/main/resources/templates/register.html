@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Register for Event')}"></head>
+<body>
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<main>
+    <div class="form-wrap animate-in" style="max-width:480px; margin-top:32px;">
+        <div style="margin-bottom:24px;">
+            <h2>Register for Event</h2>
+            <p class="form-subtitle">
+                You're registering for
+                <strong th:text="${event.name}" style="color:var(--primary)">Event Name</strong>
+            </p>
+
+            <!-- Event details -->
+            <div class="info-row">
+                <div class="info-item">
+                    <span class="info-label">Date:</span>
+                    <span th:text="${#temporals.format(event.eventDate, 'MMM d, yyyy')}">May 15, 2026</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Dept:</span>
+                    <span th:text="${event.department}">Department</span>
+                </div>
+                <div class="info-item" th:if="${event.location}">
+                    <span class="info-label">Location:</span>
+                    <span th:text="${event.location}">CS Lab 301</span>
+                </div>
+                <div class="info-item">
+                    <span class="badge"
+                          th:classappend="${event.type == 'Workshop'} ? 'badge-workshop'
+                                        : (${event.type == 'Seminar'} ? 'badge-seminar'
+                                        : (${event.type == 'Cultural'} ? 'badge-cultural'
+                                        : (${event.type == 'Sports'} ? 'badge-sports'
+                                        : (${event.type == 'Hackathon'} ? 'badge-hackathon' : 'badge-default'))))"
+                          th:text="${event.type}">Type</span>
+                </div>
+            </div>
+
+            <!-- Capacity info -->
+            <div th:if="${event.capacity}" style="margin-top:12px;">
+                <div style="display:flex; justify-content:space-between; font-size:0.8125rem; color:var(--text-muted); margin-bottom:4px;">
+                    <span th:text="${registrationCount + '/' + event.capacity + ' seats taken'}">5/40 seats taken</span>
+                    <span th:text="${event.capacity - registrationCount + ' remaining'}" style="color:var(--success); font-weight:600;">35 remaining</span>
+                </div>
+                <div class="progress-bar-wrap">
+                    <div class="progress-bar-fill"
+                         th:style="'width:' + ${(registrationCount * 100) / event.capacity} + '%'"></div>
+                </div>
+            </div>
+        </div>
+
+        <hr class="divider">
+
+        <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+        <form th:action="@{/student/register}" method="post" th:object="${student}">
+            <input type="hidden" name="eventId" th:value="${event.id}"/>
+
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" th:field="*{name}" required placeholder="e.g. Narendra A"/>
+                <span class="error-msg" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="email">University Email</label>
+                <input type="email" id="email" th:field="*{email}" required placeholder="student@university.edu"/>
+                <span class="error-msg" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top:8px;">
+                Confirm Registration
+            </button>
+        </form>
+
+        <div style="text-align:center; margin-top:20px;">
+            <a href="/" class="action-link">&larr; Cancel &amp; Go Back</a>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{layout :: footer}"></footer>
+<th:block th:replace="~{layout :: scripts}"></th:block>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('My Points')}"></head>
+<body>
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<div class="container" style="max-width:800px; margin:40px auto;">
+
+    <!-- Header -->
+    <div style="text-align:center; margin-bottom:2rem;">
+        <div style="font-size:3rem;">🎮</div>
+        <h1 style="font-size:2rem; font-weight:700;">My Gamification Profile</h1>
+        <p class="text-muted" th:text="${studentName}">Student</p>
+    </div>
+
+    <!-- Points Card -->
+    <div class="card" style="padding:2rem; text-align:center; margin-bottom:1.5rem;
+         background:linear-gradient(135deg,#6366f1,#8b5cf6); color:white;">
+        <div style="font-size:4rem; font-weight:800;" th:text="${studentPoints != null ? studentPoints.totalPoints : 0}">0</div>
+        <div style="font-size:1.1rem; opacity:0.9; margin-bottom:1rem;">Total Points</div>
+        <div style="display:flex; justify-content:center; gap:2rem; flex-wrap:wrap; opacity:0.85;">
+            <div>
+                <div style="font-size:1.5rem; font-weight:700;" th:text="${rank > 0 ? '#' + rank : 'Unranked'}">#1</div>
+                <div style="font-size:0.8rem;">Leaderboard Rank</div>
+            </div>
+            <div>
+                <div style="font-size:1.5rem; font-weight:700;"
+                     th:text="${studentPoints != null and !#strings.isEmpty(studentPoints.badges) ? #strings.listSplit(studentPoints.badges, ',').size() : 0}">0</div>
+                <div style="font-size:0.8rem;">Badges Earned</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Points Breakdown -->
+    <div class="card" style="padding:1.5rem; margin-bottom:1.5rem;">
+        <h2 style="font-size:1.1rem; font-weight:700; margin-bottom:1rem;">💰 How to Earn Points</h2>
+        <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:1rem;">
+            <div style="text-align:center; padding:1rem; background:var(--surface-2,#f8f9fa); border-radius:10px;">
+                <div style="font-size:2rem;">📝</div>
+                <div style="font-size:1.5rem; font-weight:700; color:#6366f1;" th:text="'+' + ${pointsRegister}">+10</div>
+                <div style="font-size:0.85rem; color:var(--text-muted);">Event Registration</div>
+            </div>
+            <div style="text-align:center; padding:1rem; background:var(--surface-2,#f8f9fa); border-radius:10px;">
+                <div style="font-size:2rem;">✅</div>
+                <div style="font-size:1.5rem; font-weight:700; color:#10b981;" th:text="'+' + ${pointsAttend}">+20</div>
+                <div style="font-size:0.85rem; color:var(--text-muted);">Attending Event</div>
+            </div>
+            <div style="text-align:center; padding:1rem; background:var(--surface-2,#f8f9fa); border-radius:10px;">
+                <div style="font-size:2rem;">⭐</div>
+                <div style="font-size:1.5rem; font-weight:700; color:#f59e0b;" th:text="'+' + ${pointsFeedback}">+5</div>
+                <div style="font-size:0.85rem; color:var(--text-muted);">Submitting Feedback</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Badges -->
+    <div class="card" style="padding:1.5rem; margin-bottom:1.5rem;">
+        <h2 style="font-size:1.1rem; font-weight:700; margin-bottom:1rem;">🏅 My Badges</h2>
+        <div th:if="${studentPoints == null or #strings.isEmpty(studentPoints.badges)}"
+             class="text-muted" style="text-align:center; padding:1rem;">
+            No badges yet. Keep participating to earn them!
+        </div>
+        <div th:if="${studentPoints != null and !#strings.isEmpty(studentPoints.badges)}"
+             style="display:flex; flex-wrap:wrap; gap:0.75rem;">
+            <span th:each="badge : ${#strings.listSplit(studentPoints.badges, ',')}"
+                  th:if="${!#strings.isEmpty(#strings.trim(badge))}"
+                  style="padding:0.5rem 1rem; border-radius:9999px; font-size:0.85rem; font-weight:600;
+                         background:linear-gradient(135deg,#f59e0b,#d97706); color:white; display:flex; align-items:center; gap:0.4rem;">
+                🏅 <span th:text="${badge}">Badge</span>
+            </span>
+        </div>
+
+        <!-- Badge progress -->
+        <div style="margin-top:1.25rem; display:grid; gap:0.75rem;">
+            <div th:with="pts=${studentPoints != null ? studentPoints.totalPoints : 0}">
+                <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.25rem;">
+                    <span>🏅 Active Participant (10pts)</span>
+                    <span th:text="${pts >= 10 ? '✅ Earned' : pts + '/10'}">0/10</span>
+                </div>
+                <div style="height:6px; background:var(--border-color,#e5e7eb); border-radius:3px;">
+                    <div style="height:100%; border-radius:3px; background:#6366f1; transition:width 0.5s;"
+                         th:style="'width:' + (${pts >= 10 ? 100 : pts * 10}) + '%;'"></div>
+                </div>
+            </div>
+            <div th:with="pts=${studentPoints != null ? studentPoints.totalPoints : 0}">
+                <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.25rem;">
+                    <span>🏅 Event Enthusiast (50pts)</span>
+                    <span th:text="${pts >= 50 ? '✅ Earned' : pts + '/50'}">0/50</span>
+                </div>
+                <div style="height:6px; background:var(--border-color,#e5e7eb); border-radius:3px;">
+                    <div style="height:100%; border-radius:3px; background:#10b981; transition:width 0.5s;"
+                         th:style="'width:' + (${pts >= 50 ? 100 : pts * 2}) + '%;'"></div>
+                </div>
+            </div>
+            <div th:with="pts=${studentPoints != null ? studentPoints.totalPoints : 0}">
+                <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.25rem;">
+                    <span>🏅 Top Contributor (100pts)</span>
+                    <span th:text="${pts >= 100 ? '✅ Earned' : pts + '/100'}">0/100</span>
+                </div>
+                <div style="height:6px; background:var(--border-color,#e5e7eb); border-radius:3px;">
+                    <div style="height:100%; border-radius:3px; background:#f59e0b; transition:width 0.5s;"
+                         th:style="'width:' + (${pts >= 100 ? 100 : pts}) + '%;'"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mini Leaderboard -->
+    <div class="card" style="padding:1.5rem;">
+        <h2 style="font-size:1.1rem; font-weight:700; margin-bottom:1rem;">🏆 Leaderboard (Top 5)</h2>
+        <div th:each="sp,iter : ${leaderboard}" th:if="${iter.index < 5}"
+             style="display:flex; align-items:center; justify-content:space-between; padding:0.6rem 0;
+                    border-bottom:1px solid var(--border-color,#e5e7eb);">
+            <div style="display:flex; align-items:center; gap:0.75rem;">
+                <span style="font-size:1.2rem;" th:text="${iter.index == 0 ? '🥇' : (iter.index == 1 ? '🥈' : (iter.index == 2 ? '🥉' : iter.count + '.'))}"></span>
+                <span style="font-weight:600;"
+                      th:style="${sp.student.email == studentEmail ? 'color:#6366f1;' : ''}"
+                      th:text="${sp.student.name}">Name</span>
+                <span th:if="${sp.student.email == studentEmail}"
+                      style="font-size:0.7rem; color:#6366f1; font-weight:600;">(You)</span>
+            </div>
+            <div style="font-weight:700; color:#6366f1;" th:text="${sp.totalPoints} + ' pts'">0 pts</div>
+        </div>
+        <div style="text-align:center; margin-top:1rem;">
+            <a href="/leaderboard" class="btn btn-outline" style="font-size:0.85rem;">Full Leaderboard →</a>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{layout :: footer}"></footer>
+<script th:replace="~{layout :: scripts}"></script>
+</body>
+</html>
